@@ -14,13 +14,12 @@ let questionArray = [
     "answer2": "2",
     "answer3": "3",
     "answer4": "4",
-    "correctAnswer":"1"
+    "correctAnswer":"2"
     },
 ]
 
-const numberOfAnswers = 4;
-let quizLayout = document.getElementById('quiz');
 let startBtn = document.getElementById('start');
+let quizLayout = document.getElementById('quiz');
 
 // Add event listener to start button. Hide button and initial text content when clicked.
 startBtn.addEventListener("click", function () {
@@ -33,20 +32,30 @@ startBtn.addEventListener("click", runQuiz);
 /*** Creates new Question objects and displays them on the page. */
 function runQuiz() {
     // create a new question, one by one, from the questionArray.
-    // for (let i of questionArray) {
-    //     console.log(i);
-        let currentQuestion = new Question(questionArray[0]);
+    for (let i of questionArray) {
+        console.log(i);
+        let currentQuestion = new Question(questionArray[i], "quiz");
         currentQuestion.createLayout();
-        currentQuestion.removeChildren()
-    // }
+        // Pause to wait for user input here - let the removeChildren function only be executed 
+        // after a button click event
+        currentQuestion.removeChildren();
+    }
 }
 
 
 /*** Creates a new question for display, using questions and answers from a 
  * question object. */
 class Question {
-    constructor(questionObj) {
+    /***
+     * @param {Object} questionObj Each question object should consist of a question property, 
+     *  any number of answer properties, and a correct answer property (in that order).
+     * @param {string} quizLayout The id of an element in the HTML. The Question contents will be
+     * children of this element.*/
+    constructor(questionObj, quizLayout) {
         this.questionObj = questionObj;
+        this.quizLayout = document.getElementById(quizLayout);
+        // Potential improvement: could turn the answers into an array so that numberOfAnswers === answers[].length
+        this.numberOfAnswers = 4;
     }
 
     /*** Writes a new question, new buttons, and new answers to the page. */
@@ -55,13 +64,13 @@ class Question {
         let questionPara = document.createElement('p');
         questionPara.textContent = this.questionObj["question"];
         questionPara.setAttribute("class", "question");
-        quizLayout.appendChild(questionPara);
+        this.quizLayout.appendChild(questionPara);
 
         // Next Create buttons and paragraphs for each of 4 answers.
         // Add event listeners to each button.
         // For the click event, if the button corresponds to the correct answer,
         // add the right() function. Else add wrong().
-        for (let i = 0; i < numberOfAnswers; i++) {
+        for (let i = 0; i < this.numberOfAnswers; i++) {
             let answerBtn = document.createElement('button');
             answerBtn.textContent = i + 1 + ".";
             answerBtn.setAttribute("class", "answerBtn");
@@ -69,13 +78,12 @@ class Question {
             answerPara.textContent = this.questionObj["answer" + (i + 1)];
             answerPara.setAttribute("class", "answerPara");
             
-            // append button and answer to document.
-            quizLayout.appendChild(answerBtn);
-            quizLayout.appendChild(answerPara);
+            this.quizLayout.appendChild(answerBtn);
+            this.quizLayout.appendChild(answerPara);
         }
     }
 
-    /*** Removes all Question content from the page. */
+    /*** Removes all Question object content from the page. */
     removeChildren() {
         let questionPara = document.getElementsByClassName('question');
         let answerPara = document.getElementsByClassName('answerPara');
@@ -84,15 +92,34 @@ class Question {
         // elements must be removed backwards to avoid errors in counting array elements
         // (since array elements are being actively removed!)
         for (let i = answerPara.length - 1; i >= 0; i--) {
-            quizLayout.removeChild(answerPara[i]);
+            this.quizLayout.removeChild(answerPara[i]);
         }
         
         for (let i = answerBtn.length - 1; i >= 0; i--) {
-            quizLayout.removeChild(answerBtn[i]);
+            this.quizLayout.removeChild(answerBtn[i]);
         }
         
+        // here, technically loop is unnecessary for just one question
         for (let i = questionPara.length - 1; i >= 0; i--) {
-            quizLayout.removeChild(questionPara[i]);
+            this.quizLayout.removeChild(questionPara[i]);
         }
+    }
+}
+
+/*** Creates a new Timer object. The desired starting time and penalty times 
+ * can be input as parameters. The timer can count down to 0 with decrement(), 
+ * and it can also subtract a penalty time with penalize(). */
+class Timer {
+    constructor(timeAllotted, penalty) {
+        this.timeAllotted = timeAllotted;
+        this.penalty = penalty
+    }
+
+    decrement() {
+        ;
+    }
+
+    penalize() {
+        ;
     }
 }
