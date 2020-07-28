@@ -1,0 +1,13 @@
+hr {
+    visibility: hidden;
+}
+
+.top-bar {
+    display:block;
+    max-width: auto;
+}
+
+#timer {
+    float: right;
+    text-align: right;
+}
