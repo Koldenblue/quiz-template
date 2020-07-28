@@ -9,13 +9,13 @@ let questionArray = [
     "correctAnswer":"1"
     },
 
-    { "question": "quest2?",
-    "answer1": "1",
-    "answer2": "2",
-    "answer3": "3",
-    "answer4": "4",
-    "correctAnswer":"2"
-    },
+    // { "question": "quest2?",
+    // "answer1": "1",
+    // "answer2": "2",
+    // "answer3": "3",
+    // "answer4": "4",
+    // "correctAnswer":"2"
+    // },
 ]
 
 let startBtn = document.getElementById('start');
@@ -29,24 +29,28 @@ startBtn.addEventListener("click", function () {
 startBtn.addEventListener("click", runQuiz);
 
 
-/*** Creates new Question objects and displays them on the page. */
+/** Creates new Question objects and displays them on the page. */
 function runQuiz() {
     // create a new question, one by one, from the questionArray.
-    for (let i of questionArray) {
-        console.log(i);
-        let currentQuestion = new Question(questionArray[i], "quiz");
+    let currentTimer = new Timer(100, 10);
+    currentTimer.decrement();
+
+    for (let obj of questionArray) {
+        console.log(obj);
+        let currentQuestion = new Question(obj, "quiz");
         currentQuestion.createLayout();
         // Pause to wait for user input here - let the removeChildren function only be executed 
         // after a button click event
-        currentQuestion.removeChildren();
+        // can use setTimeout(function, milliseconds)
+        currentQuestion.removeQuestion();
     }
 }
 
 
-/*** Creates a new question for display, using questions and answers from a 
+/** Creates a new question for display, using questions and answers from a 
  * question object. */
 class Question {
-    /***
+    /**
      * @param {Object} questionObj Each question object should consist of a question property, 
      *  any number of answer properties, and a correct answer property (in that order).
      * @param {string} quizLayout The id of an element in the HTML. The Question contents will be
@@ -58,13 +62,14 @@ class Question {
         this.numberOfAnswers = 4;
     }
 
-    /*** Writes a new question, new buttons, and new answers to the page. */
+    /** Writes a new question, new buttons, and new answers to the page. */
     createLayout() {
         // First create a paragraph element for the question and append it to the document.
         let questionPara = document.createElement('p');
         questionPara.textContent = this.questionObj["question"];
         questionPara.setAttribute("class", "question");
         this.quizLayout.appendChild(questionPara);
+        // can add an event listener here using event delegation
 
         // Next Create buttons and paragraphs for each of 4 answers.
         // Add event listeners to each button.
@@ -83,8 +88,8 @@ class Question {
         }
     }
 
-    /*** Removes all Question object content from the page. */
-    removeChildren() {
+    /** Removes all Question object content from the page. */
+    removeQuestion() {
         let questionPara = document.getElementsByClassName('question');
         let answerPara = document.getElementsByClassName('answerPara');
         let answerBtn = document.getElementsByClassName('answerBtn');
@@ -104,19 +109,42 @@ class Question {
             this.quizLayout.removeChild(questionPara[i]);
         }
     }
+
+    /*** Recursively removes all elements of a given class. */
+    removeClass(className) {
+        ;
+    }
 }
 
-/*** Creates a new Timer object. The desired starting time and penalty times 
+/** Creates a new Timer object. The desired starting time and penalty times 
  * can be input as parameters. The timer can count down to 0 with decrement(), 
  * and it can also subtract a penalty time with penalize(). */
 class Timer {
+    /**
+     * @param {Number} timeAllotted Time given, in seconds.
+     * @param {Number} penalty Time to be penalized, in seconds. */
     constructor(timeAllotted, penalty) {
         this.timeAllotted = timeAllotted;
-        this.penalty = penalty
+        console.log(this.timeAllotted);
+        this.penalty = penalty;
+        this.timer = document.getElementById('timer');
     }
 
     decrement() {
-        ;
+        // It is necessary to create a new variable, newTime, for use within the anonymous function.
+        // This is because the anonymous function cannot "see" or change this.timeAllotted
+        let newTime = this.timeAllotted;
+        let timerInterval = setInterval(
+            function() {
+                newTime--;
+                this.timer.textContent = "Time left: " + newTime + " seconds";
+                if (newTime === 0) {
+                    clearInterval(timerInterval);
+                    // end quiz here
+                }
+            },
+            1000
+        );
     }
 
     penalize() {
