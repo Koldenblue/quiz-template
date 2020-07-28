@@ -9,14 +9,16 @@ let questionArray = [
     "correctAnswer":"1"
     },
 
-    // { "question": "quest2?",
-    // "answer1": "1",
-    // "answer2": "2",
-    // "answer3": "3",
-    // "answer4": "4",
-    // "correctAnswer":"2"
-    // },
+    { "question": "quest2?",
+    "answer1": "1",
+    "answer2": "2",
+    "answer3": "3",
+    "answer4": "4",
+    "correctAnswer":"2"
+    },
 ]
+
+// store high score values as an object
 
 let startBtn = document.getElementById('start');
 let quizLayout = document.getElementById('quiz');
@@ -32,8 +34,7 @@ startBtn.addEventListener("click", runQuiz);
 /** Creates new Question objects and displays them on the page. */
 function runQuiz() {
     // create a new question, one by one, from the questionArray.
-    let currentTimer = new Timer(100, 10);
-    currentTimer.decrement();
+    
 
     for (let obj of questionArray) {
         console.log(obj);
@@ -109,45 +110,45 @@ class Question {
             this.quizLayout.removeChild(questionPara[i]);
         }
     }
-
-    /*** Recursively removes all elements of a given class. */
-    removeClass(className) {
-        ;
-    }
 }
 
-/** Creates a new Timer object. The desired starting time and penalty times 
- * can be input as parameters. The timer can count down to 0 with decrement(), 
- * and it can also subtract a penalty time with penalize(). */
-class Timer {
-    /**
-     * @param {Number} timeAllotted Time given, in seconds.
-     * @param {Number} penalty Time to be penalized, in seconds. */
-    constructor(timeAllotted, penalty) {
-        this.timeAllotted = timeAllotted;
-        console.log(this.timeAllotted);
-        this.penalty = penalty;
-        this.timer = document.getElementById('timer');
-    }
 
-    decrement() {
-        // It is necessary to create a new variable, newTime, for use within the anonymous function.
-        // This is because the anonymous function cannot "see" or change this.timeAllotted
-        let newTime = this.timeAllotted;
-        let timerInterval = setInterval(
-            function() {
-                newTime--;
-                this.timer.textContent = "Time left: " + newTime + " seconds";
-                if (newTime === 0) {
-                    clearInterval(timerInterval);
-                    // end quiz here
-                }
-            },
-            1000
-        );
-    }
+var newTime = 100;
+let timer = document.getElementById('timer');
+function decrement() {
+    let timerInterval = setInterval(
+        function() {
+            newTime--;
+            timer.textContent = "Time left: " + newTime + " seconds";
+            if (newTime === 0) {
+                clearInterval(timerInterval);
+                // end quiz here
+            }
+        },
+        1000
+    );
+}
 
-    penalize() {
-        ;
+function penalize() {
+    newTime -= 10;
+}
+
+function getHighScores() {
+
+}
+function displayHighScores () {
+
+}
+
+/*** Recursively removes all elements of a given class. */
+function removeClass(className) {
+    let targetToRemove = document.getElementsByClassName(className);
+
+    // remove the last child.
+    document.removeChild(targetToRemove[targetToRemove.length - 1]);
+
+    // Then if any more children exist, run the function again.
+    if (targetToRemove.length > 0) {
+        removeClass(className);
     }
 }
