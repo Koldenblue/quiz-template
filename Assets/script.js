@@ -38,11 +38,13 @@ let questionArray = [
 ]
 
 let highScores = {};
-let startBtn = document.getElementById('start');
-let quizLayout = document.getElementById('quiz');
-var newTime = 100;
+const startBtn = document.getElementById('start');
+const quizLayout = document.getElementById('quiz');
+let newTime = 100;
 let timeOver = false;
 let questionNumber = 0;
+let answerDisplayTime;
+const penaltyTime = 15;
 
 // Add event listener to start button. The start button resets the timer, hides itself, and initializes quiz-related variables..
 startBtn.addEventListener("click", function () {
@@ -136,25 +138,27 @@ class Question {
             }
             else {
                 feedbackText.textContent = "Wrong :(";
-                penalize(10);
+                penalize(penaltyTime);
             }
 
             // Unhide the 'right' or 'wrong' text
             hrElem.style.visibility = 'visible';
             feedbackText.style.visibility = 'visible';
         
-        // execute runQuiz to continue the quiz
+            // execute runQuiz to continue the quiz
             runQuiz();
 
-            // after a bit of time, hide the right or wrong text again.
-            let displayTime = newTime - 2;
-            if (displayTime < 0) {
-                displayTime = 0;
+            // After a bit of time, hide the right or wrong text again:
+            // If answerDisplayTime is defined within this function, it gets defined each time the function is called.
+            // This results in setInterval hiding the text according to each local answerDisplayTime variable,
+            // rather than based on the global time variable.
+            answerDisplayTime = newTime - 2;
+            if (answerDisplayTime < 0) {
+                answerDisplayTime = 0;
             }
             let displayInterval = setInterval(
                 function() {
-                    if (displayTime >= newTime) {
-                        newDisplay = false;
+                    if (answerDisplayTime >= newTime) {
                         hrElem.style.visibility = 'hidden';
                         feedbackText.style.visibility = 'hidden';
                         clearInterval(displayInterval);
