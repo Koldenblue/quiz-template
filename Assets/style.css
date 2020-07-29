@@ -1,3 +1,8 @@
+body {
+    font-size: larger;
+    margin: 10px;
+}
+
 hr {
     visibility: hidden;
 }
@@ -10,4 +15,16 @@ hr {
 #timer {
     float: right;
     text-align: right;
+}
+
+.answerBtn {
+margin-top: 10px;
+}
+
+.answerPara {
+    margin-top: 14px;
+}
+
+#start {
+    margin-top: 10px;
 }

@@ -2,55 +2,78 @@
 // array of questions.
 
 let questionArray = [
-    { "question": "What is a variable?",
-        "answers": ["1", "2", "3", "4"],
+    { "question": "How many bits are in a char?",
+        "answers": ["8", "16", "32", "64"],
         "correctAnswer": 0
     },
 
-    { "question": "quest2?",
-        "answers": ["1", "2", "3", "4"],
-        "correctAnswer": 1
+    { "question": "array number 2?",
+        "answers": ["1", "3", "4", "5", "22"],
+        "correctAnswer": 2
     },
 
     { "question": "How can you find the answers for this quiz?",
-        "answers": ["Inspecting the DOM for the button with id='correct'", 
-            "Looking at the questions in the JavaScript source code", 
-            "Doing research on the internet", 
+        "answers": ["Inspect the DOM for the button with id='correct'", 
+            "Look at the questions in the JavaScript source code", 
+            "Do research on the internet", 
             "All of the above"
         ],
         "correctAnswer": 3
     },
+
+    { "question": "what is question?",
+        "answers": ["no", "yes", "question?", "It's me"],
+        "correctAnswer": 2
+    },
+
+    { "question": "Question 4: quest harder?",
+        "answers": ["to be or not to be", "quest for glory", "question authority", "answer"],
+        "correctAnswer": 3
+    },
+
+    { "question": "Who is Batman?",
+        "answers": ["I'm Batman", "Bruce Wayne", "Wayne Bruce"],
+        "correctAnswer": 1
+    },
 ]
 
 let highScores = {};
-
 let startBtn = document.getElementById('start');
 let quizLayout = document.getElementById('quiz');
 var newTime = 100;
 let timeOver = false;
+let questionNumber = 0;
 
-// Add event listener to start button. Reset time variables. Hide button and initial text content when clicked.
+// Add event listener to start button. The start button resets the timer, hides itself, and initializes quiz-related variables..
 startBtn.addEventListener("click", function () {
     timeOver = false;
     newTime = 100;
+    questionNumber = 0;
     startBtn.style.display="none";
     quizLayout.textContent="";
+    timer.textContent = "Time left: " + newTime + " seconds";
+
+    // Start timer.
+    decrement();
 });
-// Start the quiz.
 startBtn.addEventListener("click", runQuiz);
 
 
 /** Creates new Question objects and displays them on the page. */
 function runQuiz() {
-    for (let obj of questionArray) {
-        console.log(obj);
-        let currentQuestion = new Question(obj, "quiz");
-        currentQuestion.createLayout();
-        // Pause to wait for user input here - let the removeChildren function only be executed 
-        // after a button click event
-        // can use setTimeout(function, milliseconds)
+    // if past last question, deal with high scores instead of continuing questions.
+    if (questionNumber === questionArray.length) {
+        endQuiz();
+        return;
     }
+    let currentQuestion = new Question(questionArray[questionNumber], "quiz");
+    questionNumber++;
+    currentQuestion.removeQuiz();
+    currentQuestion.createLayout();
+}
 
+function endQuiz() {
+    console.log("ITS OVER");
 }
 
 
@@ -67,91 +90,89 @@ class Question {
         this.numberOfAnswers = questionObj.answers.length;
     }
 
-    /** Writes a new question, new buttons, and new answers to the page. */
+    /** Writes a new question, new buttons, and new answers to the quizLayout element. */
     createLayout() {
-        // First create a paragraph element for the question and append it to the document.
+        // First create a paragraph element for the question and append it to quizLayout.
         let questionPara = document.createElement('p');
         questionPara.textContent = this.questionObj["question"];
-        questionPara.setAttribute("class", "question");
+        questionPara.setAttribute("class", "question col md-12");
         this.quizLayout.appendChild(questionPara);
-        // can add an event listener here using event delegation
 
-        // Next Create buttons and paragraphs for each of 4 answers.
-        // Add event listeners to each button.
-        // For the click event, if the button corresponds to the correct answer,
-        // add the right() function. Else add wrong().
+        // Next Create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
         for (let i = 0; i < this.numberOfAnswers; i++) {
+            let newRow = document.createElement('div');
+            newRow.setAttribute("class", "row");
+            this.quizLayout.appendChild(newRow);
+
             let answerBtn = document.createElement('button');
             answerBtn.textContent = i + 1 + ".";
-            answerBtn.setAttribute("class", "answerBtn");
+            answerBtn.setAttribute("class", "answerBtn btn btn-primary col-md-2");
+            answerBtn.setAttribute("type", "button");
             if (this.questionObj.correctAnswer === i) {
                 answerBtn.setAttribute("id", "correctAnswer");
             }
             let answerPara = document.createElement('p');
             answerPara.textContent = this.questionObj.answers[i];
-            answerPara.setAttribute("class", "answerPara");
-            
-            this.quizLayout.appendChild(answerBtn);
-            this.quizLayout.appendChild(answerPara);
+            answerPara.setAttribute("class", "answerPara col-md-10");
+
+            newRow.appendChild(answerBtn);
+            newRow.appendChild(answerPara);
         }
 
-        // Add an event listener to the parent quiz element, which activates upon a child button press.
-        // Question object is bound to checkAnswer function (otherwis 'this' would refer to quizLayout in checkAnswer())
-        this.quizLayout.addEventListener("click", this.checkAnswer.bind(this));
+        // Add an event listener to the parent quiz element, which activates upon a child button press (event delegation).
+        // 'this' inside checkAnswer() will refer to quizLayout from the event listener, rather than the Question object.
+        this.quizLayout.addEventListener("click", this.checkAnswer);
     }
 
+    /** if answer button is clicked, execute this function.
+    * Shows "Right" or "wrong" text, depending on answer */
     checkAnswer(event) {
-        // 'this' refers to quizLayout, since the eventListener on quizLayout calls this function
-        console.log("this is ");
-        console.log(this);
         event.preventDefault();
-        console.log(quizLayout);
         if (event.target.matches("button")) {
-            console.log("you clicked me!");
-            let feedbackBar = document.createElement("hr");
-            let feedbackText = document.createElement("p");
+            let hrElem = document.getElementById("hr");
+            let feedbackText = document.getElementById('right-wrong');
             if (event.target.id === "correctAnswer") {
-                console.log("correct!");
                 feedbackText.textContent = "Correct!!!"
-                
             }
             else {
-                console.log("Wrong!");
                 feedbackText.textContent = "Wrong :(";
-
+                penalize(10);
             }
-            this.quizLayout.appendChild(feedbackBar);
-            this.quizLayout.appendChild(feedbackText);
-        }
-    } 
 
-    removeQuiz() {
-        this.quizLayout.innerHTML = "";
+            // Unhide the 'right' or 'wrong' text
+            hrElem.style.visibility = 'visible';
+            feedbackText.style.visibility = 'visible';
+        
+        // execute runQuiz to continue the quiz
+            runQuiz();
+
+            // after a bit of time, hide the right or wrong text again.
+            let displayTime = newTime - 2;
+            if (displayTime < 0) {
+                displayTime = 0;
+            }
+            let displayInterval = setInterval(
+                function() {
+                    if (displayTime >= newTime) {
+                        newDisplay = false;
+                        hrElem.style.visibility = 'hidden';
+                        feedbackText.style.visibility = 'hidden';
+                        clearInterval(displayInterval);
+                    }
+                },
+                1000
+            );
+        }
     }
 
-    /** As an althernative to setting all innerHTML to an empty string with removeQuiz(), removeQuestion() 
-     * removes all Question object content from the page. */
-    removeQuestion() {
-        console.log(this.quizLayout);
-        let questionPara = document.getElementsByClassName('question');
-        let answerPara = document.getElementsByClassName('answerPara');
-        let answerBtn = document.getElementsByClassName('answerBtn');
-
-        // elements must be removed backwards to avoid errors in counting array elements
-        // (since array elements are being actively removed!)
-        for (let i = answerPara.length - 1; i >= 0; i--) {
-            this.quizLayout.removeChild(answerPara[i]);
-        }
-        
-        for (let i = answerBtn.length - 1; i >= 0; i--) {
-            this.quizLayout.removeChild(answerBtn[i]);
-        }
-        
-        this.quizLayout.removeChild(questionPara[0]);
+    /** Removes the question its container. */
+    removeQuiz() {
+        this.quizLayout.innerHTML = "";
     }
 }
 
 
+/** Displays a countdown timer. */
 let timer = document.getElementById('timer');
 function decrement() {
     let timerInterval = setInterval(
@@ -160,8 +181,7 @@ function decrement() {
             timer.textContent = "Time left: " + newTime + " seconds";
             if (newTime === 0) {
                 clearInterval(timerInterval);
-                
-                // end quiz here
+                endQuiz();
                 timeOver = true;
             }
         },
@@ -169,6 +189,7 @@ function decrement() {
     );
 }
 
+/** Penalizes the player by a number of seconds equal to the penaltyTime parameter. */
 function penalize(penaltyTime) {
     newTime -= penaltyTime;
 }
@@ -196,3 +217,7 @@ function removeClass(className) {
     // Keep running the function until no targets remain.
     removeClass(className);
 }
+
+
+
+// Problem with clicking on text still triggers event
