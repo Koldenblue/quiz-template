@@ -1,20 +1,28 @@
 body {
     font-size: larger;
-    margin: 10px;
+    /* margin: 10px; */
 }
 
-hr {
+#answer-bar {
     visibility: hidden;
 }
 
 .top-bar {
     display:block;
     max-width: auto;
+    background: rgb(182,160,240);
+    background: radial-gradient(circle, rgba(182,160,240,1) 0%, rgba(118,208,246,1) 100%, rgba(63,250,251,1) 100%);
+    padding:15px;
+    margin:0px;
 }
 
+#high-scores {
+    margin-left: 50px;
+}
 #timer {
     float: right;
     text-align: right;
+    margin-right: 50px;
 }
 
 .answerBtn {

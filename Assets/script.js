@@ -77,6 +77,7 @@ function runQuiz() {
 
 
 function endQuiz() {
+    quizLayout.innerHTML = "";
     console.log("ITS OVER");
 }
 
@@ -133,12 +134,11 @@ class Question {
         this.quizLayout.addEventListener("click", this.checkAnswer);
     }
 
-    /** if answer button is clicked, execute this function.
-    * Shows "Right" or "wrong" text, depending on answer */
+    /** if answer button is clicked, execute this function. Shows "Right" or "wrong" text, depending on answer */
     checkAnswer(event) {
         event.preventDefault();
         if (event.target.matches("button")) {
-            let hrElem = document.getElementById("hr");
+            let hrElem = document.getElementById("answer-bar");  // change to a single element. use this.element.
             let feedbackText = document.getElementById('right-wrong');
             if (event.target.id === "correctAnswer") {
                 feedbackText.textContent = "Correct!!!"
@@ -152,13 +152,14 @@ class Question {
             hrElem.style.visibility = 'visible';
             feedbackText.style.visibility = 'visible';
         
-            // execute runQuiz to continue the quiz
-            runQuiz();
+            // execute runQuiz to continue the quiz by displaying a new question
+            runQuiz(); // separate check answer and the timer functions. put run quiz in main.
+            // separate out timer function.
 
-            // After a bit of time, hide the right or wrong text again:
-            // If answerDisplayTime is defined within this function, it gets defined each time the function is called.
-            // This results in setInterval hiding the text according to each local answerDisplayTime variable,
-            // rather than based on the global time variable.
+            // After a bit of time, hide the right or wrong text again.
+            // Notes: If answerDisplayTime is defined within this function, it gets defined each time the function is called.
+            // This results in setInterval hiding the text according to each local answerDisplayTime variable.
+            // Therefore answerDisplayTime is a global time variable.
             answerDisplayTime = newTime - 2;
             if (answerDisplayTime < 0) {
                 answerDisplayTime = 0;
@@ -176,8 +177,7 @@ class Question {
         }
     }
 
-
-    /** Removes the question its container. */
+    /** Removes the question from its container. */
     removeQuiz() {
         this.quizLayout.innerHTML = "";
     }
