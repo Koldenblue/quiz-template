@@ -40,13 +40,14 @@ let questionArray = [
 let highScores = {};
 const startBtn = document.getElementById('start');
 const quizLayout = document.getElementById('quiz');
-let newTime = 100;
-let timeOver = false;
-let questionNumber = 0;
-let answerDisplayTime;
-const penaltyTime = 15;
+let newTime = 100;          // Time used by timer
+let timeOver = false;       // Indicates when time has run out
+let questionNumber = 0;     // current question being asked from questionArray
+let answerDisplayTime;      // The amount of time that "Right" or "Wrong" is displayed
+const penaltyTime = 15;     // Penalty time for an incorrect answer
 
-// Add event listener to start button. The start button resets the timer, hides itself, and initializes quiz-related variables..
+
+// The start button resets the timer, hides itself, erases intitial content, and resets quiz-related variables.
 startBtn.addEventListener("click", function () {
     timeOver = false;
     newTime = 100;
@@ -74,6 +75,7 @@ function runQuiz() {
     currentQuestion.createLayout();
 }
 
+
 function endQuiz() {
     console.log("ITS OVER");
 }
@@ -82,10 +84,10 @@ function endQuiz() {
 /** Properties for a quiz Question, and methods for displaying and removing the Question. */
 class Question {
     /**
-     * @param {Object} questionObj Each question object should consist of a question property, 
-     *  an array of answers, and a correct answer with an array index as a value (in that order).
+     * @param {Object} questionObj Each questionObj should consist of a 'question' property, 
+     *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value (in that order).
      * @param {string} quizLayout The id of an element in the HTML. The Question contents will be
-     * children of this element.*/
+     * placed here, as children of this element.*/
     constructor(questionObj, quizLayout) {
         this.questionObj = questionObj;
         this.quizLayout = document.getElementById(quizLayout);
@@ -100,29 +102,34 @@ class Question {
         questionPara.setAttribute("class", "question col md-12");
         this.quizLayout.appendChild(questionPara);
 
-        // Next Create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
+        // Use for loop to create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
         for (let i = 0; i < this.numberOfAnswers; i++) {
             let newRow = document.createElement('div');
             newRow.setAttribute("class", "row");
             this.quizLayout.appendChild(newRow);
 
             let answerBtn = document.createElement('button');
+            // add 1 to i on answer button text, so answers start from 1 rather than 0
             answerBtn.textContent = i + 1 + ".";
             answerBtn.setAttribute("class", "answerBtn btn btn-primary col-md-2");
             answerBtn.setAttribute("type", "button");
+            // add correctAnswer id to the correct answer button
             if (this.questionObj.correctAnswer === i) {
                 answerBtn.setAttribute("id", "correctAnswer");
             }
+            // create paragraphs containing answer options
             let answerPara = document.createElement('p');
             answerPara.textContent = this.questionObj.answers[i];
             answerPara.setAttribute("class", "answerPara col-md-10");
 
+            // Final step of loop: append the created elements.
             newRow.appendChild(answerBtn);
             newRow.appendChild(answerPara);
         }
 
-        // Add an event listener to the parent quiz element, which activates upon a child button press (event delegation).
-        // 'this' inside checkAnswer() will refer to quizLayout from the event listener, rather than the Question object.
+        // To complete the layout function, add an event listener to the parent quiz element.
+        // The listener activates upon a child button press (event delegation).
+        // Note: 'this' inside checkAnswer() will refer to this.quizLayout from the event listener, rather than the Question object.
         this.quizLayout.addEventListener("click", this.checkAnswer);
     }
 
@@ -169,6 +176,7 @@ class Question {
         }
     }
 
+
     /** Removes the question its container. */
     removeQuiz() {
         this.quizLayout.innerHTML = "";
@@ -193,14 +201,17 @@ function decrement() {
     );
 }
 
+
 /** Penalizes the player by a number of seconds equal to the penaltyTime parameter. */
 function penalize(penaltyTime) {
     newTime -= penaltyTime;
 }
 
+
 function youGotAHighScore() {
     ;
 }
+
 
 function displayHighScores () {
     ;
@@ -221,7 +232,3 @@ function removeClass(className) {
     // Keep running the function until no targets remain.
     removeClass(className);
 }
-
-
-
-// Problem with clicking on text still triggers event
