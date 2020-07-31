@@ -37,20 +37,28 @@ let questionArray = [
     },
 ]
 
-let highScores = {};
+let highScoresObj = {};
 const startBtn = document.getElementById('start');
 const quizLayout = document.getElementById('quiz');
+let timeOver = true;       // indicates that quiz is over
 let newTime = 100;          // Time used by timer
-let timeOver = false;       // Indicates when time has run out
 let questionNumber = 0;     // current question being asked from questionArray
 let answerDisplayTime;      // The amount of time that "Right" or "Wrong" is displayed
-const penaltyTime = 15;     // Penalty time for an incorrect answer
+const penaltyTime = 20;     // Penalty time for an incorrect answer
+
+/** Creates the initial quiz explanation and start button. */
+function initialQuiz() {
+    quizLayout.innerHTML = "Answer all the questions within the time limit! Incorrect answers will subtract " + penaltyTime + " seconds from the time."
+    startBtn.style.display = "visible";
+}
+
+initialQuiz();
 
 
 // The start button resets the timer, hides itself, erases intitial content, and resets quiz-related variables.
 startBtn.addEventListener("click", function () {
-    timeOver = false;
     newTime = 100;
+    timeOver = false;
     questionNumber = 0;
     startBtn.style.display="none";
     quizLayout.textContent="";
@@ -59,6 +67,7 @@ startBtn.addEventListener("click", function () {
     // Start timer.
     decrement();
 });
+
 startBtn.addEventListener("click", runQuiz);
 
 
@@ -66,120 +75,128 @@ startBtn.addEventListener("click", runQuiz);
 function runQuiz() {
     // if past last question, deal with high scores instead of continuing questions.
     if (questionNumber === questionArray.length) {
-        endQuiz();
+        youGotAHighScore();
         return;
     }
-    let currentQuestion = new Question(questionArray[questionNumber], "quiz");
+    quizLayout.innerHTML = "";
+    createLayout(questionArray[questionNumber]);
     questionNumber++;
-    currentQuestion.removeQuiz();
-    currentQuestion.createLayout();
 }
 
 
-function endQuiz() {
+function youGotAHighScore() {
+    timeOver = true;
     quizLayout.innerHTML = "";
     console.log("ITS OVER");
+    // TODO
+    let highScore = newTime;
+    timer.textContent = "Timer";
+    if (highScore < 0) {
+        highScore = 0;
+    }
+    quizLayout.innerHTML = "Your score was: " + highScore;
+    let highScoreDisplay = document.createElement('p');
+    if (highScore === 0) {
+        highScoreDisplay.textContent = "Ouch, better luck next time!";
+        quizLayout.appendChild(highScoreDisplay);
+    }
+    else
+    {
+        highScoreDisplay.textContent = "Good job!";
+        quizLayout.appendChild(highScoreDisplay);
+    }
+    
 }
 
 
-/** Properties for a quiz Question, and methods for displaying and removing the Question. */
-class Question {
-    /**
-     * @param {Object} questionObj Each questionObj should consist of a 'question' property, 
-     *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value (in that order).
-     * @param {string} quizLayout The id of an element in the HTML. The Question contents will be
-     * placed here, as children of this element.*/
-    constructor(questionObj, quizLayout) {
-        this.questionObj = questionObj;
-        this.quizLayout = document.getElementById(quizLayout);
-        this.numberOfAnswers = questionObj.answers.length;
-    }
+function displayHighScores () {
+    ;
+}
 
-    /** Writes a new question, new buttons, and new answers to the quizLayout element. */
-    createLayout() {
-        // First create a paragraph element for the question and append it to quizLayout.
-        let questionPara = document.createElement('p');
-        questionPara.textContent = this.questionObj["question"];
-        questionPara.setAttribute("class", "question col md-12");
-        this.quizLayout.appendChild(questionPara);
 
-        // Use for loop to create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
-        for (let i = 0; i < this.numberOfAnswers; i++) {
-            let newRow = document.createElement('div');
-            newRow.setAttribute("class", "row");
-            this.quizLayout.appendChild(newRow);
+    /** Writes a new question, new buttons, and new answers to the quizLayout element.
+     * @param {Object} questionObj Each questionObj should consist of a 'question' property,
+     *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value (in that order). */
+function createLayout(questionObj) {
+    let numberOfAnswers = questionObj.answers.length;
 
-            let answerBtn = document.createElement('button');
-            // add 1 to i on answer button text, so answers start from 1 rather than 0
-            answerBtn.textContent = i + 1 + ".";
-            answerBtn.setAttribute("class", "answerBtn btn btn-primary col-md-2");
-            answerBtn.setAttribute("type", "button");
-            // add correctAnswer id to the correct answer button
-            if (this.questionObj.correctAnswer === i) {
-                answerBtn.setAttribute("id", "correctAnswer");
-            }
-            // create paragraphs containing answer options
-            let answerPara = document.createElement('p');
-            answerPara.textContent = this.questionObj.answers[i];
-            answerPara.setAttribute("class", "answerPara col-md-10");
+    // First create a paragraph element for the question and append it to quizLayout.
+    let questionPara = document.createElement('p');
+    questionPara.textContent = questionObj["question"];
+    questionPara.setAttribute("class", "question col md-12");
+    quizLayout.appendChild(questionPara);
 
-            // Final step of loop: append the created elements.
-            newRow.appendChild(answerBtn);
-            newRow.appendChild(answerPara);
+    // Use for loop to create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
+    for (let i = 0; i < numberOfAnswers; i++) {
+        let newRow = document.createElement('div');
+        newRow.setAttribute("class", "row");
+        quizLayout.appendChild(newRow);
+
+        let answerBtn = document.createElement('button');
+        // add 1 to i on answer button text, so answers start from 1 rather than 0
+        answerBtn.textContent = i + 1 + ".";
+        answerBtn.setAttribute("class", "answerBtn btn btn-primary col-md-2");
+        answerBtn.setAttribute("type", "button");
+        // add correctAnswer id to the correct answer button
+        if (questionObj.correctAnswer === i) {
+            answerBtn.setAttribute("id", "correctAnswer");
         }
+        // create paragraphs containing answer options
+        let answerPara = document.createElement('p');
+        answerPara.textContent = questionObj.answers[i];
+        answerPara.setAttribute("class", "answerPara col-md-10");
 
-        // To complete the layout function, add an event listener to the parent quiz element.
-        // The listener activates upon a child button press (event delegation).
-        // Note: 'this' inside checkAnswer() will refer to this.quizLayout from the event listener, rather than the Question object.
-        this.quizLayout.addEventListener("click", this.checkAnswer);
+        // Final step of loop: append the created elements.
+        newRow.appendChild(answerBtn);
+        newRow.appendChild(answerPara);
     }
+
+    // To complete the layout function, add an event listener to the parent quiz element.
+    // The listener activates upon a child button press (event delegation).
+    // Note: 'this' inside checkAnswer() will refer to this.quizLayout from the event listener, rather than the Question object.
+    quizLayout.addEventListener("click", checkAnswer);
+}
+
 
     /** if answer button is clicked, execute this function. Shows "Right" or "wrong" text, depending on answer */
-    checkAnswer(event) {
-        event.preventDefault();
-        if (event.target.matches("button")) {
-            let hrElem = document.getElementById("answer-bar");  // change to a single element. use this.element.
-            let feedbackText = document.getElementById('right-wrong');
-            if (event.target.id === "correctAnswer") {
-                feedbackText.textContent = "Correct!!!"
-            }
-            else {
-                feedbackText.textContent = "Wrong :(";
-                penalize(penaltyTime);
-            }
-
-            // Unhide the 'right' or 'wrong' text
-            hrElem.style.visibility = 'visible';
-            feedbackText.style.visibility = 'visible';
-        
-            // execute runQuiz to continue the quiz by displaying a new question
-            runQuiz(); // separate check answer and the timer functions. put run quiz in main.
-            // separate out timer function.
-
-            // After a bit of time, hide the right or wrong text again.
-            // Notes: If answerDisplayTime is defined within this function, it gets defined each time the function is called.
-            // This results in setInterval hiding the text according to each local answerDisplayTime variable.
-            // Therefore answerDisplayTime is a global time variable.
-            answerDisplayTime = newTime - 2;
-            if (answerDisplayTime < 0) {
-                answerDisplayTime = 0;
-            }
-            let displayInterval = setInterval(
-                function() {
-                    if (answerDisplayTime >= newTime) {
-                        hrElem.style.visibility = 'hidden';
-                        feedbackText.style.visibility = 'hidden';
-                        clearInterval(displayInterval);
-                    }
-                },
-                1000
-            );
+function checkAnswer(event) {
+    event.preventDefault();
+    if (event.target.matches("button")) {
+        let hrElem = document.getElementById("answer-bar");
+        let feedbackText = document.getElementById('right-wrong');
+        if (event.target.id === "correctAnswer") {
+            feedbackText.textContent = "Correct!!!"
         }
-    }
+        else {
+            feedbackText.textContent = "Wrong :(";
+            penalize(penaltyTime);
+        }
 
-    /** Removes the question from its container. */
-    removeQuiz() {
-        this.quizLayout.innerHTML = "";
+        // Unhide the 'right' or 'wrong' text
+        hrElem.style.visibility = 'visible';
+        feedbackText.style.visibility = 'visible';
+
+        // execute runQuiz to continue the quiz by displaying a new question
+        runQuiz();
+
+        // After a bit of time, hide the right or wrong text again.
+        // Notes: If answerDisplayTime is defined within this function, it gets defined each time the function is called.
+        // This results in setInterval hiding the text according to each local answerDisplayTime variable.
+        // Therefore answerDisplayTime is a global time variable. Similar situation for setTimeout().
+        answerDisplayTime = newTime - 2;
+        if (answerDisplayTime < 0) {
+            answerDisplayTime = 0;
+        }
+        let displayInterval = setInterval(
+            function() {
+                if (answerDisplayTime >= newTime) {
+                    hrElem.style.visibility = 'hidden';
+                    feedbackText.style.visibility = 'hidden';
+                    clearInterval(displayInterval);
+                }
+            },
+            1000
+        );
     }
 }
 
@@ -191,10 +208,13 @@ function decrement() {
         function() {
             newTime--;
             timer.textContent = "Time left: " + newTime + " seconds";
-            if (newTime === 0) {
+            if (newTime <= 0) {
                 clearInterval(timerInterval);
-                endQuiz();
-                timeOver = true;
+                youGotAHighScore();
+            }
+            if (timeOver) {
+                clearInterval(timerInterval);
+                timer.textContent = "Timer";
             }
         },
         1000
@@ -205,30 +225,4 @@ function decrement() {
 /** Penalizes the player by a number of seconds equal to the penaltyTime parameter. */
 function penalize(penaltyTime) {
     newTime -= penaltyTime;
-}
-
-
-function youGotAHighScore() {
-    ;
-}
-
-
-function displayHighScores () {
-    ;
-}
-
-
-/** Removes all elements of a given class. */
-function removeClass(className) {
-    let targetToRemove = document.getElementsByClassName(className);
-
-    if (targetToRemove.length === 0) {
-        return;
-    }
-
-    // remove the last child of the parent element of the targeted class.
-    targetToRemove[targetToRemove.length - 1].parentNode.removeChild(targetToRemove[targetToRemove.length - 1]);
-
-    // Keep running the function until no targets remain.
-    removeClass(className);
 }
