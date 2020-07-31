@@ -39,6 +39,7 @@ let questionArray = [
 
 let highScoresObj = {};
 const startBtn = document.getElementById('start');
+const highScoresBtn = document.getElementById('high-scores-btn')
 const quizLayout = document.getElementById('quiz');
 let timeOver = true;       // indicates that quiz is over
 let newTime = 100;          // Time used by timer
@@ -57,11 +58,12 @@ initialQuiz();
 
 // The start button resets the timer, hides itself, erases intitial content, and resets quiz-related variables.
 startBtn.addEventListener("click", function () {
+    highScoresBtn.style.display = "none"
     newTime = 100;
     timeOver = false;
     questionNumber = 0;
-    startBtn.style.display="none";
-    quizLayout.textContent="";
+    startBtn.style.display = "none";
+    quizLayout.textContent = "";
     timer.textContent = "Time left: " + newTime + " seconds";
 
     // Start timer.
@@ -85,27 +87,43 @@ function runQuiz() {
 
 
 function youGotAHighScore() {
+    // set timeOver to true, so that the timer stops. Remove the right-wrong bar after 2 seconds.
     timeOver = true;
+    let displayInterval = setTimeout(
+        function() {
+            document.getElementById("answer-bar").style.visibility = "hidden";
+            document.getElementById('right-wrong').style.visibility = "hidden";
+        },
+        2000
+    );
+
     quizLayout.innerHTML = "";
     console.log("ITS OVER");
-    // TODO
+
+    // score cannot be lower than zero.
     let highScore = newTime;
     timer.textContent = "Timer";
     if (highScore < 0) {
         highScore = 0;
     }
+
+    // Display score.
     quizLayout.innerHTML = "Your score was: " + highScore;
     let highScoreDisplay = document.createElement('p');
+    highScoreDisplay.setAttribute("class", "col-md-12 high-score");
     if (highScore === 0) {
         highScoreDisplay.textContent = "Ouch, better luck next time!";
         quizLayout.appendChild(highScoreDisplay);
     }
-    else
-    {
+    else {
         highScoreDisplay.textContent = "Good job!";
         quizLayout.appendChild(highScoreDisplay);
     }
-    
+
+    // Display start button again. Display high scores button.
+    startBtn.textContent = "Restart?";
+    startBtn.style.display = "inline-block";
+    highScoresBtn.style.display = "inline-block";
 }
 
 

@@ -33,6 +33,10 @@ margin-top: 10px;
     margin-top: 14px;
 }
 
-#start {
+#start, #high-scores-btn {
     margin-top: 10px;
+}
+
+#high-scores-btn {
+    display: none;
 }
