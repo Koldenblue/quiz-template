@@ -2,28 +2,28 @@
 // array of questions.
 
 let questionArray = [
-    { "question": "How many bits are in a char?",
-        "answers": ["8", "16", "32", "64"],
-        "correctAnswer": 0
+    { "question": "How many bits are in a byte?",
+        "answers": ["4", "8", "16", "32", "64"],
+        "correctAnswer": 1
     },
 
-    { "question": "array number 2?",
-        "answers": ["1", "3", "4", "5", "22"],
+    { "question": "If I have a JavaScript array, 'spam = [1, 2, 3, 4, 5]', then what is spam[1] equal to?",
+        "answers": ["1", "[1, 2, 3, 4, 5]", "2", "undefined"],
         "correctAnswer": 2
     },
 
-    { "question": "How can you find the answers for this quiz?",
+    { "question": "If you were a detective looking for the quiz answers, where might you look?",
         "answers": ["Inspect the DOM for the button with id='correct'", 
-            "Look at the questions in the JavaScript source code", 
+            "Look for the questions in the JavaScript source code", 
             "Do research on the internet", 
             "All of the above"
         ],
         "correctAnswer": 3
     },
 
-    { "question": "what is question?",
-        "answers": ["no", "yes", "question?", "It's me"],
-        "correctAnswer": 2
+    { "question": "What does API stand for, in the context of web development?",
+        "answers": ["Are people insane?", "Asynchronous Possibility Interweaving", "Always Program Intelligently", "Application Programming Interface"],
+        "correctAnswer": 3
     },
 
     { "question": "Question 4: quest harder?",

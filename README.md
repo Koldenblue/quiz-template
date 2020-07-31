@@ -1,2 +1,1 @@
-# homework-4
-Javascript quiz questions
+# Javascript quiz questions
