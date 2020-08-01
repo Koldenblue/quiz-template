@@ -7,34 +7,34 @@ let questionArray = [
         "correctAnswer": 1
     },
 
-    { "question": "If I have a JavaScript array, 'spam = [1, 2, 3, 4, 5]', then what is spam[1] equal to?",
-        "answers": ["1", "[1, 2, 3, 4, 5]", "2", "undefined"],
-        "correctAnswer": 2
-    },
+    // { "question": "If I have a JavaScript array, 'spam = [1, 2, 3, 4, 5]', then what is spam[1] equal to?",
+    //     "answers": ["1", "[1, 2, 3, 4, 5]", "2", "undefined"],
+    //     "correctAnswer": 2
+    // },
 
-    { "question": "If you were a detective looking for the quiz answers, where might you look?",
-        "answers": ["Inspect the DOM for the button with id='correct'", 
-            "Look for the questions in the JavaScript source code", 
-            "Do research on the internet", 
-            "All of the above"
-        ],
-        "correctAnswer": 3
-    },
+    // { "question": "If you were a detective looking for the quiz answers, where might you look?",
+    //     "answers": ["Inspect the DOM for the button with id='correct'", 
+    //         "Look for the questions in the JavaScript source code", 
+    //         "Do research on the internet", 
+    //         "All of the above"
+    //     ],
+    //     "correctAnswer": 3
+    // },
 
-    { "question": "What does API stand for, in the context of web development?",
-        "answers": ["Are people insane?", "Asynchronous Possibility Interweaving", "Always Program Intelligently", "Application Programming Interface"],
-        "correctAnswer": 3
-    },
+    // { "question": "What does API stand for, in the context of web development?",
+    //     "answers": ["Are people insane!", "Asynchronous Possibility Interweaving", "Always Program Intelligently", "Application Programming Interface"],
+    //     "correctAnswer": 3
+    // },
 
-    { "question": "Question 4: quest harder?",
-        "answers": ["to be or not to be", "quest for glory", "question authority", "answer"],
-        "correctAnswer": 3
-    },
+    // { "question": "Question 4: quest harder?",
+    //     "answers": ["to be or not to be", "quest for glory", "question authority", "answer"],
+    //     "correctAnswer": 3
+    // },
 
-    { "question": "Who is Batman?",
-        "answers": ["I'm Batman", "Bruce Wayne", "Wayne Bruce"],
-        "correctAnswer": 1
-    },
+    // { "question": "Who is Batman?",
+    //     "answers": ["I'm Batman", "Bruce Wayne", "Wayne Bruce"],
+    //     "correctAnswer": 1
+    // },
 ]
 
 let highestScores = [];
@@ -49,8 +49,8 @@ let timeOver = true;        // indicates that quiz is over
 let newTime = 100;          // Time used by timer
 let questionNumber = 0;     // current question being asked from questionArray
 let answerDisplayTime;      // The amount of time that "Right" or "Wrong" is displayed
-const penaltyTime = 10;     // Penalty time for an incorrect answer
-let highScore               // The player's score at the end of the quiz.
+const penaltyTime = 20;     // Penalty time for an incorrect answer
+let highScore;              // The player's score at the end of the quiz.
 
 
 /** Creates the initial quiz explanation and start button. */
@@ -75,7 +75,7 @@ initialQuiz();
 
 // The start button resets the timer, hides itself, erases intitial content, and resets quiz-related variables.
 startBtn.addEventListener("click", function () {
-    highScoresBtn.style.display = "none"
+    highScoresBtn.style.display = "none";
     newTime = 100;
     timeOver = false;
     questionNumber = 0;
@@ -150,7 +150,6 @@ function youGotAHighScore() {
     else if (!isHighScore(highScore)) {
         highScoreDisplay.textContent += "\nGood job! But you didn't get a high score this time!";
         quizLayout.appendChild(highScoreDisplay);
-        document.getElementsByClassName("name-input-row")[0].style.display="block";
     }
     // Give opportunity to add to high scores list.
     else {
@@ -165,43 +164,69 @@ function youGotAHighScore() {
     highScoresBtn.style.display = "inline-block";
 }
 
-// prevent page from reloading upon pressing enter while focused on the form. 
-// Remove the form from the page, and display the high scores.
-function submitName(event) {
-    event.preventDefault();
-    inputName(highScore);
-    document.getElementsByClassName("name-input-row")[0].style.display="none";
-    displayHighScores();
-}
 
-
-/** Determines whether a score is a high score. Also sorts and adds scores to the high scores array.
+/** Determines whether a score is a high score. Also sorts the high scores array.
 * Only the top 10 high scores will be stored. */
-function isHighScore(score) {
-
-    // if there are less than 10 scores in the high score list, then add to the high scores.
+function isHighScore(highScore) {
+    // if there are less than 10 scores in the high score list, return true.
     highestScores.sort();
     if (highestScores.length < 10) {
-        highestScores.push(score);  //TODO: ONLY PUsh score if player enters name
-        localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
         return true;
     }
-
     // since scores are sorted, only need to check if the given score is higher than the lowest score.
-    if (score > highestScores[0]) {
-        highestScores.push(score);
-        highestScores.shift();
-        localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
+    if (highScore > highestScores[0]) {
         return true;
     }
     return false;
 }
 
-/** Need description and name validation. */
+
+/** submitName() is the function called by the event listener for the high score form.
+ * Prevents page from reloading upon pressing enter while focused on the form. 
+ * Remove the form from the page, and display the high scores. */
+function submitName(event) {
+    event.preventDefault();
+    // By the time submitName() runs, isHighScore() will already have sorted and checked the high scores array
+    // Only store 10 scores at a time.
+    if (inputName(highScore)) {
+        if (highestScores.length >= 10) {
+            // sort scores from highScoresObj and delete lowest score from the object.
+            // sortedScores[i][0] is a score associated with a name at sortedScores[i][1].
+            // sortedScores in in order from highest to lowest score.
+            let sortedScores = scoreSort();
+            console.log(sortedScores);
+            let lowScorerName = sortedScores[sortedScores.length - 1][1]; // is the score / name of the lowest scorer
+            console.log(lowScorerName)
+            highScoresObj[lowScorerName].sort()
+            highScoresObj[lowScorerName].splice(0, 1); // deletes first score in array for name
+            // Also remove the score from the high score array.
+            highestScores.shift();
+        }
+        highestScores.push(highScore);
+        localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
+        document.getElementsByClassName("name-input-row")[0].style.display="none";
+        displayHighScores();
+    }
+}
+
+
+/** inputName() validates name inputs. 
+ * It also adds an input name and score to the highScoresObj Object. 
+ * The score will be input as a part of an array of scores, for each unique name.
+ * This allows a given name to have more than one high score associated with it. */
 function inputName(highScore) {
     let nameInput = document.querySelector("#name-text").value;
 
-    // allow a player with a given name to have more than one high score.
+    if (nameInput === "") {
+        alert("You must have at least one character in your name!");
+        return false;
+    }
+    if (nameInput.length > 50) {
+        alert("Maximum character length for names is 50 characters!");
+        return false;
+    }
+
+    // If the name is not already in storage, create a new name and score array.
     if (highScoresObj[nameInput] === undefined) {
         highScoresObj[nameInput] = [];
         highScoresObj[nameInput].push(highScore);
@@ -211,62 +236,59 @@ function inputName(highScore) {
         highScoresObj[nameInput].push(highScore);
         localStorage.setItem("storedHighScoreList", JSON.stringify(highScoresObj));
     }
+    return true;
 }
 
 
 function displayHighScores() {
     quizLayout.innerHTML = "";
+    highScoresBtn.style.display = "none";
 
-    // each name property in the highScoresObj has an associated array of Number scores
-    let sortedScores = [];
+    // each name property in the highScoresObj has an associated array of Number scores.
+    // Add names and scores to a 2D array, so that they may be sorted and displayed in order.
+    let sortedScores = scoreSort();
+
+    let alternateBackground = true      // indicates alternate background colors for alternating rows
+    for (let i = 0, j = sortedScores.length; i < j; i++) {
+        // append a score row to the quiz
+        let scoreRow = document.createElement("div");
+        if (alternateBackground) {
+            scoreRow.setAttribute("class", "row high-score-row odd-row");
+            alternateBackground = false;
+        }
+        else {
+            scoreRow.setAttribute("class", "row high-score-row even-row");
+            alternateBackground = true;
+        }
+        quizLayout.appendChild(scoreRow);
+
+        // put the high score list inside each row
+        let nameCol = document.createElement("div");
+        nameCol.setAttribute("class", "col-md-11");
+        nameCol.textContent = sortedScores[i][1];
+        scoreRow.appendChild(nameCol);
+        let scoreCol = document.createElement("div");
+        scoreCol.setAttribute("class", "col-md-1");
+        scoreCol.textContent = sortedScores[i][0];
+        scoreRow.appendChild(scoreCol);
+    }
+    // create a row for each high score, up to 10 rows
+}
+
+/** Gets the names and high scores from highScoresObj and puts them into a 2D arrray.
+ * Then uses bubble sort to sort the 2D array of names and scores, from highest to lowest.
+ * where scoreArray[i][0] is a score, and scoreArray[i][1] is the associated name. */
+function scoreSort() {
+    let scoreArray = [];
     for (let scoreName in highScoresObj) {
         for (let i = 0, j = highScoresObj[scoreName].length; i < j; i++) {
             let individualScore = [];
             individualScore.push(highScoresObj[scoreName][i]);
             individualScore.push(scoreName);
-            sortedScores.push(individualScore);
+            scoreArray.push(individualScore);
         }
     }
-    console.log(sortedScores);
-    scoreSort(sortedScores);
-    console.log(sortedScores);
 
-
-    // append a score row to the quiz
-    // for num of high scores in object list
-    // get each obj name and value
-    let alternateBackground = true
-    for (let scoreName in highScoresObj) {
-        for (let i = 0, j = highScoresObj[scoreName].length; i < j; i++) {
-            let scoreRow = document.createElement("div");
-            if (alternateBackground) {
-                scoreRow.setAttribute("class", "row high-score-row odd-row");
-                alternateBackground = false;
-            }
-            else {
-                scoreRow.setAttribute("class", "row high-score-row even-row");
-                alternateBackground = true;
-            }
-            quizLayout.appendChild(scoreRow);
-
-            // put the high score list inside each row
-            let nameCol = document.createElement("div");
-            nameCol.setAttribute("class", "col-md-11");
-            nameCol.textContent = scoreName;
-            scoreRow.appendChild(nameCol);
-            let scoreCol = document.createElement("div");
-            scoreCol.setAttribute("class", "col-md-1");
-            scoreCol.textContent = highScoresObj[scoreName][i];
-            scoreRow.appendChild(scoreCol);
-        }
-    }
-    // create a row for each high score, up to 10 rows
-}
-
-/** Uses bubble sort to sort a 2D array of names and scores, from highest to lowest.
- * where scoreArray[i][0] is a score, and scoreArray[i][1] is the associated name. */
-function scoreSort(scoreArray) {
-    // bubble sort: swap adjacent numbers out of order. if no numbers swapped (swap === 0), end loop.
     do {
         // Using var instead of let, otherwise swap is inaccessible to the while statement at the end.
         var swap = 0;
@@ -279,6 +301,7 @@ function scoreSort(scoreArray) {
             } 
         }
     } while (swap != 0);
+    return scoreArray;
 }
 
 // QUIZ QUESTION FUNCTIONS
