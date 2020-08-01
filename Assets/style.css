@@ -16,10 +16,10 @@ body {
     margin:0px;
 }
 
-#high-scores {
+.top-left-bar {
     margin-left: 50px;
 }
-#timer {
+.top-right-bar {
     float: right;
     text-align: right;
     margin-right: 50px;
@@ -38,5 +38,9 @@ margin-top: 10px;
 }
 
 #high-scores-btn {
+    display: none;
+}
+
+.name-input-form {
     display: none;
 }

@@ -19,13 +19,15 @@
   <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
     integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
     crossorigin="anonymous"></script>
-  <script defer src="Assets/script.js"></script>
+  <script defer src="Assets/high-scores.js"></script>
 
 </head>
 
 <body>
   <div class='top-bar'>
-    <a href="#" id="high-scores">Check out the code for this quiz on GitHub!</div>
+    <a href="index.html" class="top-left-bar">Return to quiz</a>
+    <a href="https://github.com/Koldenblue/quiz-template" target="_blank" id="github" class="top-right-bar">Check out the code for this quiz on GitHub!</a>
+  </div>
 
   <hr>
 
@@ -33,9 +35,18 @@
     <div class='row'>
       <h1 class='col-md-12'>High Scores</h1>
     </div>
+    <div class = "row">
+      <form id="name-input" method="POST">
+        <label for="name-text">Enter your name</label>
+        <input type="text" placeholder="Your name here" id="name-text">
+      </form>
+    </div>
+
 
     <div class='container' id='quiz'></div>
-
+    <div class='row'>
+      <h1 class='col-md-12'>High Scores List</h1>
+    </div>
     <button type="button" class="btn btn-primary" id='start'>Return to Quiz</button>
     <button type="button" class="btn btn-primary" id='high-scores-btn'>Reset High Scores</button>
 

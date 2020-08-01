@@ -39,6 +39,7 @@ let questionArray = [
 
 let highScoresObj = {};
 const startBtn = document.getElementById('start');
+const submitScoreBtn = document.getElementById("submit-score");
 const highScoresBtn = document.getElementById('high-scores-btn')
 const quizLayout = document.getElementById('quiz');
 let timeOver = true;       // indicates that quiz is over
@@ -46,6 +47,7 @@ let newTime = 100;          // Time used by timer
 let questionNumber = 0;     // current question being asked from questionArray
 let answerDisplayTime;      // The amount of time that "Right" or "Wrong" is displayed
 const penaltyTime = 20;     // Penalty time for an incorrect answer
+
 
 /** Creates the initial quiz explanation and start button. */
 function initialQuiz() {
@@ -55,6 +57,7 @@ function initialQuiz() {
 
 initialQuiz();
 
+document.getElementById("high-scores-btn").addEventListener("click", displayHighScores)
 
 // The start button resets the timer, hides itself, erases intitial content, and resets quiz-related variables.
 startBtn.addEventListener("click", function () {
@@ -65,6 +68,7 @@ startBtn.addEventListener("click", function () {
     startBtn.style.display = "none";
     quizLayout.textContent = "";
     timer.textContent = "Time left: " + newTime + " seconds";
+    document.getElementsByClassName("name-input-form")[0].style.display="none";
 
     // Start timer.
     decrement();
@@ -73,7 +77,7 @@ startBtn.addEventListener("click", function () {
 startBtn.addEventListener("click", runQuiz);
 
 
-/** Creates new Question objects and displays them on the page. */
+/** If there are more questions, erases the current quiz layout container and displays them on the page. */
 function runQuiz() {
     // if past last question, deal with high scores instead of continuing questions.
     if (questionNumber === questionArray.length) {
@@ -97,28 +101,43 @@ function youGotAHighScore() {
         2000
     );
 
+    // Remove any remaining quiz questions from the page.
     quizLayout.innerHTML = "";
     console.log("ITS OVER");
 
-    // score cannot be lower than zero.
+    // Define score as time remaining. Score cannot be lower than zero.
     let highScore = newTime;
+
+    // Create a new <p> to display the score.
+    let highScoreDisplay = document.createElement('p');
+    highScoreDisplay.setAttribute("class", "col-md-12 high-score");
+    quizLayout.textContent = "Your score was: " + highScore;
+
+
     timer.textContent = "Timer";
     if (highScore < 0) {
         highScore = 0;
     }
-
-    // Display score.
-    quizLayout.innerHTML = "Your score was: " + highScore;
-    let highScoreDisplay = document.createElement('p');
-    highScoreDisplay.setAttribute("class", "col-md-12 high-score");
     if (highScore === 0) {
-        highScoreDisplay.textContent = "Ouch, better luck next time!";
+        highScoreDisplay.textContent += "\nOuch, better luck next time!";
         quizLayout.appendChild(highScoreDisplay);
     }
     else {
-        highScoreDisplay.textContent = "Good job!";
+        highScoreDisplay.textContent += "\nGood job!";
         quizLayout.appendChild(highScoreDisplay);
+        document.getElementsByClassName("name-input-form")[0].style.display="block";
+        
+        submitScoreBtn.addEventListener("click", function(event) {
+            event.preventDefault();
+            let nameInput = document.querySelector("#name-text").value;
+            
+        })
+
     }
+
+
+    localStorage.setItem("high score", highScore);
+    // Display score.
 
     // Display start button again. Display high scores button.
     startBtn.textContent = "Restart?";
