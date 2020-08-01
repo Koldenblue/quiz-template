@@ -50,6 +50,7 @@ let newTime = 100;          // Time used by timer
 let questionNumber = 0;     // current question being asked from questionArray
 let answerDisplayTime;      // The amount of time that "Right" or "Wrong" is displayed
 const penaltyTime = 10;     // Penalty time for an incorrect answer
+let highScore               // The player's score at the end of the quiz.
 
 
 /** Creates the initial quiz explanation and start button. */
@@ -105,6 +106,12 @@ function runQuiz() {
 // HIGH SCORE FUNCTIONS
 // ---------------------
 
+nameInputForm.addEventListener("submit", function() {
+    submitName(event);
+});
+submitScoreBtn.addEventListener("click", function() {
+    submitName(event);
+});
 
 document.getElementById("high-scores-btn").addEventListener("click", displayHighScores);
 
@@ -125,7 +132,7 @@ function youGotAHighScore() {
 
     // Define score as time remaining. Score cannot be lower than zero.
     timer.textContent = "Timer";
-    let highScore = newTime;
+    highScore = newTime;
     if (highScore < 0) {
         highScore = 0;
     }
@@ -150,19 +157,6 @@ function youGotAHighScore() {
         highScoreDisplay.textContent += "\nGood job!";
         quizLayout.appendChild(highScoreDisplay);
         document.getElementsByClassName("name-input-row")[0].style.display="block";
-
-        // prevent page from reloading upon pressing enter while focused on the form.
-        nameInputForm.addEventListener("submit", function(event) {
-            event.preventDefault();
-            inputName(highScore);
-            displayHighScores();
-        });
-
-        submitScoreBtn.addEventListener("click", function(event) {
-            event.preventDefault();
-            inputName(highScore);
-            displayHighScores();
-        })
     }
 
     // Display start button again. Display high scores button.
@@ -171,6 +165,16 @@ function youGotAHighScore() {
     highScoresBtn.style.display = "inline-block";
 }
 
+// prevent page from reloading upon pressing enter while focused on the form. 
+// Remove the form from the page, and display the high scores.
+function submitName(event) {
+    event.preventDefault();
+    inputName(highScore);
+    document.getElementsByClassName("name-input-row")[0].style.display="none";
+    displayHighScores();
+}
+
+
 /** Determines whether a score is a high score. Also sorts and adds scores to the high scores array.
 * Only the top 10 high scores will be stored. */
 function isHighScore(score) {
@@ -178,7 +182,7 @@ function isHighScore(score) {
     // if there are less than 10 scores in the high score list, then add to the high scores.
     highestScores.sort();
     if (highestScores.length < 10) {
-        highestScores.push(score);
+        highestScores.push(score);  //TODO: ONLY PUsh score if player enters name
         localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
         return true;
     }
@@ -212,9 +216,70 @@ function inputName(highScore) {
 
 function displayHighScores() {
     quizLayout.innerHTML = "";
+
+    // each name property in the highScoresObj has an associated array of Number scores
+    let sortedScores = [];
+    for (let scoreName in highScoresObj) {
+        for (let i = 0, j = highScoresObj[scoreName].length; i < j; i++) {
+            let individualScore = [];
+            individualScore.push(highScoresObj[scoreName][i]);
+            individualScore.push(scoreName);
+            sortedScores.push(individualScore);
+        }
+    }
+    console.log(sortedScores);
+    scoreSort(sortedScores);
+    console.log(sortedScores);
+
+
+    // append a score row to the quiz
+    // for num of high scores in object list
+    // get each obj name and value
+    let alternateBackground = true
+    for (let scoreName in highScoresObj) {
+        for (let i = 0, j = highScoresObj[scoreName].length; i < j; i++) {
+            let scoreRow = document.createElement("div");
+            if (alternateBackground) {
+                scoreRow.setAttribute("class", "row high-score-row odd-row");
+                alternateBackground = false;
+            }
+            else {
+                scoreRow.setAttribute("class", "row high-score-row even-row");
+                alternateBackground = true;
+            }
+            quizLayout.appendChild(scoreRow);
+
+            // put the high score list inside each row
+            let nameCol = document.createElement("div");
+            nameCol.setAttribute("class", "col-md-11");
+            nameCol.textContent = scoreName;
+            scoreRow.appendChild(nameCol);
+            let scoreCol = document.createElement("div");
+            scoreCol.setAttribute("class", "col-md-1");
+            scoreCol.textContent = highScoresObj[scoreName][i];
+            scoreRow.appendChild(scoreCol);
+        }
+    }
     // create a row for each high score, up to 10 rows
 }
 
+/** Uses bubble sort to sort a 2D array of names and scores, from highest to lowest.
+ * where scoreArray[i][0] is a score, and scoreArray[i][1] is the associated name. */
+function scoreSort(scoreArray) {
+    // bubble sort: swap adjacent numbers out of order. if no numbers swapped (swap === 0), end loop.
+    do {
+        // Using var instead of let, otherwise swap is inaccessible to the while statement at the end.
+        var swap = 0;
+        for (let i = 0, j = scoreArray.length - 1; i < j; i++) {
+            if (scoreArray[i][0] < scoreArray[i + 1][0]) {
+                let tmp = scoreArray[i];
+                scoreArray[i] = scoreArray[i + 1];
+                scoreArray[i + 1] = tmp;
+                swap++;
+            } 
+        }
+    } while (swap != 0);
+}
 
 // QUIZ QUESTION FUNCTIONS
 // -----------------------

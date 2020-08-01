@@ -1,6 +1,7 @@
 body {
     font-size: larger;
     /* margin: 10px; */
+    background-color: rgb(73, 73, 73);
 }
 
 #answer-bar {
@@ -43,4 +44,12 @@ margin-top: 10px;
 
 .name-input-row {
     display: none;
+}
+
+.even-row {
+    background-color: darkseagreen;
+}
+
+.odd-row {
+    background-color: dimgrey;
 }
