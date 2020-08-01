@@ -43,23 +43,34 @@ const startBtn = document.getElementById('start');
 const submitScoreBtn = document.getElementById("submit-score");
 const highScoresBtn = document.getElementById('high-scores-btn')
 const quizLayout = document.getElementById('quiz');
-let timeOver = true;       // indicates that quiz is over
+const timer = document.getElementById('timer');
+const nameInputForm = document.getElementById("name-input-form");
+let timeOver = true;        // indicates that quiz is over
 let newTime = 100;          // Time used by timer
 let questionNumber = 0;     // current question being asked from questionArray
 let answerDisplayTime;      // The amount of time that "Right" or "Wrong" is displayed
-const penaltyTime = 20;     // Penalty time for an incorrect answer
+const penaltyTime = 10;     // Penalty time for an incorrect answer
 
 
 /** Creates the initial quiz explanation and start button. */
 function initialQuiz() {
-    quizLayout.innerHTML = "Answer all the questions within the time limit! Incorrect answers will subtract " + penaltyTime + " seconds from the time."
+    console.log("Page reloaded.");
+    quizLayout.innerHTML = "Answer all the questions within the time limit! Incorrect answers will subtract " + penaltyTime + " seconds from the time.";
     startBtn.style.display = "visible";
-    // need to retrieve high scores array and object from local storage
+
+    // retrieve high scores lists from local storage.
+    let storedHighScoresArray = JSON.parse(localStorage.getItem("highestScoresArray"));
+    if (storedHighScoresArray !== null) {
+        highestScores = storedHighScoresArray;
+    }
+    let storedHighScoreList = JSON.parse(localStorage.getItem("storedHighScoreList"));
+    if (storedHighScoreList !== null) {
+        highScoresObj = storedHighScoreList;
+    }
 }
 
 initialQuiz();
 
-document.getElementById("high-scores-btn").addEventListener("click", displayHighScores)
 
 // The start button resets the timer, hides itself, erases intitial content, and resets quiz-related variables.
 startBtn.addEventListener("click", function () {
@@ -70,16 +81,15 @@ startBtn.addEventListener("click", function () {
     startBtn.style.display = "none";
     quizLayout.textContent = "";
     timer.textContent = "Time left: " + newTime + " seconds";
-    document.getElementsByClassName("name-input-form")[0].style.display="none";
-
+    document.getElementsByClassName("name-input-row")[0].style.display="none";
+    
     // Start timer and run the quiz.
     decrement();
     runQuiz();
 });
 
 
-
-/** If there are more questions, erases the current quiz layout container and displays them on the page. */
+/** If there are remaining questions, erases the current quiz layout container and displays them on the page. */
 function runQuiz() {
     // if past last question, deal with high scores instead of continuing questions.
     if (questionNumber === questionArray.length) {
@@ -95,8 +105,11 @@ function runQuiz() {
 // HIGH SCORE FUNCTIONS
 // ---------------------
 
+
+document.getElementById("high-scores-btn").addEventListener("click", displayHighScores);
+
 function youGotAHighScore() {
-    // set timeOver to true, so that the timer stops. Remove the right-wrong bar after 2 seconds.
+    // set timeOver to true, so that the timer stops. Remove the right-wrong bar after stopping timer.
     timeOver = true;
     let displayInterval = setTimeout(
         function() {
@@ -126,20 +139,29 @@ function youGotAHighScore() {
         highScoreDisplay.textContent += "\nOuch, better luck next time!";
         quizLayout.appendChild(highScoreDisplay);
     }
-    // If score is higher than zero, give opportunity to add to high scores list.
-    
+    // check high scores list. Only 10 high scores will be accepted.
+    else if (!isHighScore(highScore)) {
+        highScoreDisplay.textContent += "\nGood job! But you didn't get a high score this time!";
+        quizLayout.appendChild(highScoreDisplay);
+        document.getElementsByClassName("name-input-row")[0].style.display="block";
+    }
+    // Give opportunity to add to high scores list.
     else {
-        // but also check highestScores array!
-        
         highScoreDisplay.textContent += "\nGood job!";
         quizLayout.appendChild(highScoreDisplay);
-        document.getElementsByClassName("name-input-form")[0].style.display="block";
-        
+        document.getElementsByClassName("name-input-row")[0].style.display="block";
+
+        // prevent page from reloading upon pressing enter while focused on the form.
+        nameInputForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            inputName(highScore);
+            displayHighScores();
+        });
+
         submitScoreBtn.addEventListener("click", function(event) {
             event.preventDefault();
-            let nameInput = document.querySelector("#name-text").value;
-            highScoresObj[nameInput] = highScore;
-            localStorage.setItem("high score", JSON.stringify(highScoresObj));
+            inputName(highScore);
+            displayHighScores();
         })
     }
 
@@ -149,13 +171,15 @@ function youGotAHighScore() {
     highScoresBtn.style.display = "inline-block";
 }
 
-// Determines whether a score is a high score. Only the top 10 high scores will be stored.
+/** Determines whether a score is a high score. Also sorts and adds scores to the high scores array.
+* Only the top 10 high scores will be stored. */
 function isHighScore(score) {
 
     // if there are less than 10 scores in the high score list, then add to the high scores.
     highestScores.sort();
     if (highestScores.length < 10) {
         highestScores.push(score);
+        localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
         return true;
     }
 
@@ -163,14 +187,32 @@ function isHighScore(score) {
     if (score > highestScores[0]) {
         highestScores.push(score);
         highestScores.shift();
-        return true();
+        localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
+        return true;
     }
     return false;
 }
 
+/** Need description and name validation. */
+function inputName(highScore) {
+    let nameInput = document.querySelector("#name-text").value;
+
+    // allow a player with a given name to have more than one high score.
+    if (highScoresObj[nameInput] === undefined) {
+        highScoresObj[nameInput] = [];
+        highScoresObj[nameInput].push(highScore);
+        localStorage.setItem("storedHighScoreList", JSON.stringify(highScoresObj));
+    }
+    else {
+        highScoresObj[nameInput].push(highScore);
+        localStorage.setItem("storedHighScoreList", JSON.stringify(highScoresObj));
+    }
+}
+
 
 function displayHighScores() {
-    ;
+    quizLayout.innerHTML = "";
+    // create a row for each high score, up to 10 rows
 }
 
 
@@ -268,7 +310,6 @@ function checkAnswer(event) {
 // ----------------
 
 /** Displays a countdown timer. */
-let timer = document.getElementById('timer');
 function decrement() {
     let timerInterval = setInterval(
         function() {
