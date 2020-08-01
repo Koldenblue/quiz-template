@@ -7,34 +7,34 @@ let questionArray = [
         "correctAnswer": 1
     },
 
-    // { "question": "If I have a JavaScript array, 'spam = [1, 2, 3, 4, 5]', then what is spam[1] equal to?",
-    //     "answers": ["1", "[1, 2, 3, 4, 5]", "2", "undefined"],
-    //     "correctAnswer": 2
-    // },
+    { "question": "If I have a JavaScript array, 'spam = [1, 2, 3, 4, 5]', then what is spam[1] equal to?",
+        "answers": ["1", "[1, 2, 3, 4, 5]", "2", "undefined"],
+        "correctAnswer": 2
+    },
 
-    // { "question": "If you were a detective looking for the quiz answers, where might you look?",
-    //     "answers": ["Inspect the DOM for the button with id='correct'", 
-    //         "Look for the questions in the JavaScript source code", 
-    //         "Do research on the internet", 
-    //         "All of the above"
-    //     ],
-    //     "correctAnswer": 3
-    // },
+    { "question": "If you were a detective looking for the quiz answers, where might you look?",
+        "answers": ["Inspect the DOM for the button with id='correct'", 
+            "Look for the questions in the JavaScript source code", 
+            "Do research on the internet", 
+            "All of the above"
+        ],
+        "correctAnswer": 3
+    },
 
-    // { "question": "What does API stand for, in the context of web development?",
-    //     "answers": ["Are people insane!", "Asynchronous Possibility Interweaving", "Always Program Intelligently", "Application Programming Interface"],
-    //     "correctAnswer": 3
-    // },
+    { "question": "What does API stand for, in the context of web development?",
+        "answers": ["Are people insane!", "Asynchronous Possibility Interweaving", "Always Program Intelligently", "Application Programming Interface"],
+        "correctAnswer": 3
+    },
 
-    // { "question": "Question 4: quest harder?",
-    //     "answers": ["to be or not to be", "quest for glory", "question authority", "answer"],
-    //     "correctAnswer": 3
-    // },
+    { "question": "Question 4: quest harder?",
+        "answers": ["to be or not to be", "quest for glory", "question authority", "answer"],
+        "correctAnswer": 3
+    },
 
-    // { "question": "Who is Batman?",
-    //     "answers": ["I'm Batman", "Bruce Wayne", "Wayne Bruce"],
-    //     "correctAnswer": 1
-    // },
+    { "question": "Who is Batman?",
+        "answers": ["I'm Batman", "Bruce Wayne", "Wayne Bruce"],
+        "correctAnswer": 1
+    },
 ]
 
 let highestScores = [];
@@ -114,6 +114,10 @@ submitScoreBtn.addEventListener("click", function() {
 });
 
 document.getElementById("high-scores-btn").addEventListener("click", displayHighScores);
+document.getElementById("top-left-high-scores").addEventListener("click", function() {
+    startBtn.style.display = "inline-block";
+    displayHighScores();
+});
 
 function youGotAHighScore() {
     // set timeOver to true, so that the timer stops. Remove the right-wrong bar after stopping timer.

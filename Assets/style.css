@@ -51,7 +51,7 @@ margin-top: 10px;
 }
 
 .odd-row {
-    background-color: dimgrey;
+    background-color: rgb(136, 136, 136);
 }
 
 #submit-score {
