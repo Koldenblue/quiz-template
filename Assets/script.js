@@ -37,6 +37,7 @@ let questionArray = [
     },
 ]
 
+let highestScores = [];
 let highScoresObj = {};
 const startBtn = document.getElementById('start');
 const submitScoreBtn = document.getElementById("submit-score");
@@ -53,6 +54,7 @@ const penaltyTime = 20;     // Penalty time for an incorrect answer
 function initialQuiz() {
     quizLayout.innerHTML = "Answer all the questions within the time limit! Incorrect answers will subtract " + penaltyTime + " seconds from the time."
     startBtn.style.display = "visible";
+    // need to retrieve high scores array and object from local storage
 }
 
 initialQuiz();
@@ -70,11 +72,11 @@ startBtn.addEventListener("click", function () {
     timer.textContent = "Time left: " + newTime + " seconds";
     document.getElementsByClassName("name-input-form")[0].style.display="none";
 
-    // Start timer.
+    // Start timer and run the quiz.
     decrement();
+    runQuiz();
 });
 
-startBtn.addEventListener("click", runQuiz);
 
 
 /** If there are more questions, erases the current quiz layout container and displays them on the page. */
@@ -89,6 +91,9 @@ function runQuiz() {
     questionNumber++;
 }
 
+
+// HIGH SCORE FUNCTIONS
+// ---------------------
 
 function youGotAHighScore() {
     // set timeOver to true, so that the timer stops. Remove the right-wrong bar after 2 seconds.
@@ -106,23 +111,26 @@ function youGotAHighScore() {
     console.log("ITS OVER");
 
     // Define score as time remaining. Score cannot be lower than zero.
+    timer.textContent = "Timer";
     let highScore = newTime;
+    if (highScore < 0) {
+        highScore = 0;
+    }
 
     // Create a new <p> to display the score.
     let highScoreDisplay = document.createElement('p');
     highScoreDisplay.setAttribute("class", "col-md-12 high-score");
     quizLayout.textContent = "Your score was: " + highScore;
 
-
-    timer.textContent = "Timer";
-    if (highScore < 0) {
-        highScore = 0;
-    }
     if (highScore === 0) {
         highScoreDisplay.textContent += "\nOuch, better luck next time!";
         quizLayout.appendChild(highScoreDisplay);
     }
+    // If score is higher than zero, give opportunity to add to high scores list.
+    
     else {
+        // but also check highestScores array!
+        
         highScoreDisplay.textContent += "\nGood job!";
         quizLayout.appendChild(highScoreDisplay);
         document.getElementsByClassName("name-input-form")[0].style.display="block";
@@ -130,14 +138,10 @@ function youGotAHighScore() {
         submitScoreBtn.addEventListener("click", function(event) {
             event.preventDefault();
             let nameInput = document.querySelector("#name-text").value;
-            
+            highScoresObj[nameInput] = highScore;
+            localStorage.setItem("high score", JSON.stringify(highScoresObj));
         })
-
     }
-
-
-    localStorage.setItem("high score", highScore);
-    // Display score.
 
     // Display start button again. Display high scores button.
     startBtn.textContent = "Restart?";
@@ -145,15 +149,37 @@ function youGotAHighScore() {
     highScoresBtn.style.display = "inline-block";
 }
 
+// Determines whether a score is a high score. Only the top 10 high scores will be stored.
+function isHighScore(score) {
 
-function displayHighScores () {
+    // if there are less than 10 scores in the high score list, then add to the high scores.
+    highestScores.sort();
+    if (highestScores.length < 10) {
+        highestScores.push(score);
+        return true;
+    }
+
+    // since scores are sorted, only need to check if the given score is higher than the lowest score.
+    if (score > highestScores[0]) {
+        highestScores.push(score);
+        highestScores.shift();
+        return true();
+    }
+    return false;
+}
+
+
+function displayHighScores() {
     ;
 }
 
 
+// QUIZ QUESTION FUNCTIONS
+// -----------------------
+
     /** Writes a new question, new buttons, and new answers to the quizLayout element.
      * @param {Object} questionObj Each questionObj should consist of a 'question' property,
-     *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value (in that order). */
+     *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value. */
 function createLayout(questionObj) {
     let numberOfAnswers = questionObj.answers.length;
 
@@ -238,6 +264,9 @@ function checkAnswer(event) {
 }
 
 
+// TIMER FUNCTIONS
+// ----------------
+
 /** Displays a countdown timer. */
 let timer = document.getElementById('timer');
 function decrement() {
@@ -257,7 +286,6 @@ function decrement() {
         1000
     );
 }
-
 
 /** Penalizes the player by a number of seconds equal to the penaltyTime parameter. */
 function penalize(penaltyTime) {
