@@ -1,13 +1,13 @@
 "use strict";
-// array of questions.
 
+// Quiz questions to be asked.
 let questionArray = [
     { "question": "How many bits are in a byte?",
         "answers": ["4", "8", "16", "32", "64"],
         "correctAnswer": 1
     },
 
-    { "question": "If I have a JavaScript array, 'spam = [1, 2, 3, 4, 5]', then what is spam[1] equal to?",
+    { "question": "In the JavaScript array \"spam = [1, 2, 3, 4, 5]\", what is spam[1] equal to?",
         "answers": ["1", "[1, 2, 3, 4, 5]", "2", "undefined"],
         "correctAnswer": 2
     },
@@ -22,38 +22,36 @@ let questionArray = [
     },
 
     { "question": "What does API stand for, in the context of web development?",
-        "answers": ["Are people insane!", "Asynchronous Possibility Interweaving", "Always Program Intelligently", "Application Programming Interface"],
+        "answers": ["Are People Insane?!", "Asynchronous Possibility Interweaving", "Always Program Intelligently", "Application Programming Interface"],
         "correctAnswer": 3
     },
 
-    { "question": "Question 4: quest harder?",
-        "answers": ["to be or not to be", "quest for glory", "question authority", "answer"],
-        "correctAnswer": 3
+    { "question": "Which is NOT a type of loop in JavaScript?",
+        "answers": ["try... catch loops", "while loops", "do... while loops", "for loops"],
+        "correctAnswer": 0
     },
+];
 
-    { "question": "Who is Batman?",
-        "answers": ["I'm Batman", "Bruce Wayne", "Wayne Bruce"],
-        "correctAnswer": 1
-    },
-]
-
-let highestScores = [];
-let highScoresObj = {};
 const startBtn = document.getElementById('start');
 const submitScoreBtn = document.getElementById("submit-score");
-const highScoresBtn = document.getElementById('high-scores-btn')
+const highScoresBtn = document.getElementById('high-scores-btn');
 const quizLayout = document.getElementById('quiz');
 const timer = document.getElementById('timer');
 const nameInputForm = document.getElementById("name-input-form");
+let highestScores = [];     // stores the top 10 highest scores
+let highScoresObj = {};     // stores high score names and associated scores
 let timeOver = true;        // indicates that quiz is over
 let newTime = 100;          // Time used by timer
 let questionNumber = 0;     // current question being asked from questionArray
 let answerDisplayTime;      // The amount of time that "Right" or "Wrong" is displayed
 const penaltyTime = 20;     // Penalty time for an incorrect answer
-let highScore;              // The player's score at the end of the quiz.
+let highScore;              // The player's score at the end of the quiz
 
 
-/** Creates the initial quiz explanation and start button. */
+// MAIN FUNCTIONS
+// --------------
+
+/** Creates the initial quiz explanation and start button, and retrieves local storage. */
 function initialQuiz() {
     console.log("Page reloaded.");
     quizLayout.innerHTML = "Answer all the questions within the time limit! Incorrect answers will subtract " + penaltyTime + " seconds from the time.";
@@ -70,10 +68,11 @@ function initialQuiz() {
     }
 }
 
+// Run initial function upon page reload.
 initialQuiz();
 
 
-// The start button resets the timer, hides itself, erases intitial content, and resets quiz-related variables.
+// The start button resets the timer, hides itself, hides high score elements, erases intitial content, and resets quiz-related variables.
 startBtn.addEventListener("click", function () {
     highScoresBtn.style.display = "none";
     newTime = 100;
@@ -83,20 +82,22 @@ startBtn.addEventListener("click", function () {
     quizLayout.textContent = "";
     timer.textContent = "Time left: " + newTime + " seconds";
     document.getElementsByClassName("name-input-row")[0].style.display="none";
-    
+
     // Start timer and run the quiz.
     decrement();
     runQuiz();
 });
 
 
-/** If there are remaining questions, erases the current quiz layout container and displays them on the page. */
+/** Run the quiz. If there are remaining questions, erase the current quiz layout container and display questions on the page.
+ * If not, deal with high scores. */
 function runQuiz() {
-    // if past last question, deal with high scores instead of continuing questions.
+    // If past last question, deal with high scores instead of continuing questions:
     if (questionNumber === questionArray.length) {
         youGotAHighScore();
         return;
     }
+    // Display next question:
     quizLayout.innerHTML = "";
     createLayout(questionArray[questionNumber]);
     questionNumber++;
@@ -106,19 +107,22 @@ function runQuiz() {
 // HIGH SCORE FUNCTIONS
 // ---------------------
 
+// Add event listener functionality to high score forms and buttons:
 nameInputForm.addEventListener("submit", function() {
     submitName(event);
 });
 submitScoreBtn.addEventListener("click", function() {
     submitName(event);
 });
-
 document.getElementById("high-scores-btn").addEventListener("click", displayHighScores);
 document.getElementById("top-left-high-scores").addEventListener("click", function() {
     startBtn.style.display = "inline-block";
     displayHighScores();
 });
 
+
+/** Ends the quiz by erasing quiz content. Then, determines the score, and whether a high score was obtained.
+ * If a high score was obtained, the high score input form is displayed. */
 function youGotAHighScore() {
     // set timeOver to true, so that the timer stops. Remove the right-wrong bar after stopping timer.
     timeOver = true;
@@ -155,7 +159,7 @@ function youGotAHighScore() {
         highScoreDisplay.textContent += "\nGood job! But you didn't get a high score this time!";
         quizLayout.appendChild(highScoreDisplay);
     }
-    // Give opportunity to add to high scores list.
+    // If high score, give opportunity to add to high scores list.
     else {
         highScoreDisplay.textContent += "\nGood job!";
         quizLayout.appendChild(highScoreDisplay);
@@ -177,7 +181,7 @@ function isHighScore(highScore) {
     if (highestScores.length < 10) {
         return true;
     }
-    // since scores are sorted, only need to check if the given score is higher than the lowest score.
+    // Since highestScores is sorted, only check if the given highScore is higher than the lowest score.
     if (highScore > highestScores[0]) {
         return true;
     }
@@ -186,41 +190,46 @@ function isHighScore(highScore) {
 
 
 /** submitName() is the function called by the event listener for the high score form.
- * Prevents page from reloading upon pressing enter while focused on the form. 
- * Remove the form from the page, and display the high scores. */
+ * submitName() first calls inputName() to validate and store a name given by the user.
+ * If the name is valid, it then trims the list of scores to the top 10, 
+ * and displays the high scores using displayHighScores(). */
 function submitName(event) {
+    // Prevent page from reloading upon enter key press.
     event.preventDefault();
-    // By the time submitName() runs, isHighScore() will already have sorted and checked the high scores array
+    // By this time, isHighScore() will already have sorted and checked the high scores array, highestScores.
+
     // Only store 10 scores at a time.
     if (inputName(highScore)) {
         if (highestScores.length >= 10) {
-            // sort scores from highScoresObj and delete lowest score from the object.
-            // sortedScores[i][0] is a score associated with a name at sortedScores[i][1].
+            // Sort scores from highScoresObj
+            // For reference: sortedScores[i][0] is a score associated with a name at sortedScores[i][1].
             // sortedScores in in order from highest to lowest score.
             let sortedScores = scoreSort();
-            console.log(sortedScores);
-            let lowScorerName = sortedScores[sortedScores.length - 1][1]; // is the score / name of the lowest scorer
-            console.log(lowScorerName)
-            highScoresObj[lowScorerName].sort()
-            highScoresObj[lowScorerName].splice(0, 1); // deletes first score in array for name
-            // Also remove the score from the high score array.
+            let lowScorerName = sortedScores[sortedScores.length - 1][1]; // this is the score / name of the lowest scorer
+            highScoresObj[lowScorerName].sort();
+            // Delete first score (the lowest score) in array for associated name:
+            highScoresObj[lowScorerName].splice(0, 1);
+            // Finally, remove the lowest score from the high score array.
             highestScores.shift();
         }
+
+        // Add the newest high score and put it into local storage.
         highestScores.push(highScore);
         localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
+
+        // Display the high scores list.
         document.getElementsByClassName("name-input-row")[0].style.display="none";
         displayHighScores();
     }
 }
 
 
-/** inputName() validates name inputs. 
- * It also adds an input name and score to the highScoresObj Object. 
- * The score will be input as a part of an array of scores, for each unique name.
- * This allows a given name to have more than one high score associated with it. */
+/** inputName() validates name inputs.
+ * After validation, it adds the input name and score to the highScoresObj Object. */
 function inputName(highScore) {
     let nameInput = document.querySelector("#name-text").value;
 
+    // Validate name:
     if (nameInput === "") {
         alert("You must have at least one character in your name!");
         return false;
@@ -230,7 +239,10 @@ function inputName(highScore) {
         return false;
     }
 
-    // If the name is not already in storage, create a new name and score array.
+    // The score will be input as a part of an array of scores. Each score array is associated with
+    // a unique name property, which is part of the Object highScoresObj.
+    // This allows a given name to have more than one high score associated with it.
+    // So, if the name is not already in use, create the new name and associated score array.
     if (highScoresObj[nameInput] === undefined) {
         highScoresObj[nameInput] = [];
         highScoresObj[nameInput].push(highScore);
@@ -244,17 +256,17 @@ function inputName(highScore) {
 }
 
 
+/** Sort and display high scores, in order from highest to lowest. */
 function displayHighScores() {
     quizLayout.innerHTML = "";
     highScoresBtn.style.display = "none";
 
-    // each name property in the highScoresObj has an associated array of Number scores.
-    // Add names and scores to a 2D array, so that they may be sorted and displayed in order.
+    // scoreSort() returns a sorted 2D array of names and scores.
     let sortedScores = scoreSort();
 
     let alternateBackground = true      // indicates alternate background colors for alternating rows
+    // A loop that first appends a score row to the quiz. Then it adds two columns, one for names and one for scores.
     for (let i = 0, j = sortedScores.length; i < j; i++) {
-        // append a score row to the quiz
         let scoreRow = document.createElement("div");
         if (alternateBackground) {
             scoreRow.setAttribute("class", "row high-score-row odd-row");
@@ -266,7 +278,6 @@ function displayHighScores() {
         }
         quizLayout.appendChild(scoreRow);
 
-        // put the high score list inside each row
         let nameCol = document.createElement("div");
         nameCol.setAttribute("class", "col-md-11");
         nameCol.textContent = sortedScores[i][1];
@@ -276,13 +287,14 @@ function displayHighScores() {
         scoreCol.textContent = sortedScores[i][0];
         scoreRow.appendChild(scoreCol);
     }
-    // create a row for each high score, up to 10 rows
 }
+
 
 /** Gets the names and high scores from highScoresObj and puts them into a 2D arrray.
  * Then uses bubble sort to sort the 2D array of names and scores, from highest to lowest.
- * where scoreArray[i][0] is a score, and scoreArray[i][1] is the associated name. */
+ * The returned array scoreArray[i][0] is a score, and scoreArray[i][1] is the associated name. */
 function scoreSort() {
+    // Get names and scores into new array, scoreArray:
     let scoreArray = [];
     for (let scoreName in highScoresObj) {
         for (let i = 0, j = highScoresObj[scoreName].length; i < j; i++) {
@@ -293,8 +305,9 @@ function scoreSort() {
         }
     }
 
+    // bubble sort on scoreArray, sorting in descending order:
     do {
-        // Using var instead of let, otherwise swap is inaccessible to the while statement at the end.
+        // Using var here instead of let, otherwise 'swap' is inaccessible to the while statement at the end.
         var swap = 0;
         for (let i = 0, j = scoreArray.length - 1; i < j; i++) {
             if (scoreArray[i][0] < scoreArray[i + 1][0]) {
@@ -308,12 +321,13 @@ function scoreSort() {
     return scoreArray;
 }
 
+
 // QUIZ QUESTION FUNCTIONS
 // -----------------------
 
-    /** Writes a new question, new buttons, and new answers to the quizLayout element.
-     * @param {Object} questionObj Each questionObj should consist of a 'question' property,
-     *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value. */
+/** Writes a new question, new buttons, and new answers to the quizLayout element.
+ * @param {Object} questionObj Each questionObj should consist of a 'question' property,
+ *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value. */
 function createLayout(questionObj) {
     let numberOfAnswers = questionObj.answers.length;
 
@@ -323,39 +337,38 @@ function createLayout(questionObj) {
     questionPara.setAttribute("class", "question col md-12");
     quizLayout.appendChild(questionPara);
 
-    // Use for loop to create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
+    // Use a for loop to create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
     for (let i = 0; i < numberOfAnswers; i++) {
         let newRow = document.createElement('div');
         newRow.setAttribute("class", "row");
         quizLayout.appendChild(newRow);
 
         let answerBtn = document.createElement('button');
-        // add 1 to i on answer button text, so answers start from 1 rather than 0
+        // Here, add 1 to i on the answer button text, so answers start from 1 rather than 0
         answerBtn.textContent = i + 1 + ".";
-        answerBtn.setAttribute("class", "answerBtn btn btn-primary col-md-2");
+        answerBtn.setAttribute("class", "answerBtn btn btn-primary col-md-1");
         answerBtn.setAttribute("type", "button");
         // add correctAnswer id to the correct answer button
         if (questionObj.correctAnswer === i) {
             answerBtn.setAttribute("id", "correctAnswer");
         }
-        // create paragraphs containing answer options
+        // create paragraphs containing the answer options
         let answerPara = document.createElement('p');
         answerPara.textContent = questionObj.answers[i];
-        answerPara.setAttribute("class", "answerPara col-md-10");
+        answerPara.setAttribute("class", "answerPara col-md-11");
 
         // Final step of loop: append the created elements.
         newRow.appendChild(answerBtn);
         newRow.appendChild(answerPara);
     }
 
-    // To complete the layout function, add an event listener to the parent quiz element.
-    // The listener activates upon a child button press (event delegation).
-    // Note: 'this' inside checkAnswer() will refer to this.quizLayout from the event listener, rather than the Question object.
+    // To complete the layout function, add an event listener to the parent quiz div element.
+    // The listener activates upon an answer button press, since the answer buttons are children. (event delegation).
     quizLayout.addEventListener("click", checkAnswer);
 }
 
 
-    /** if answer button is clicked, execute this function. Shows "Right" or "wrong" text, depending on answer */
+/** if answer button is clicked, execute this function. Shows "Right" or "wrong" text, depending on answer */
 function checkAnswer(event) {
     event.preventDefault();
     if (event.target.matches("button")) {
@@ -377,7 +390,7 @@ function checkAnswer(event) {
         runQuiz();
 
         // After a bit of time, hide the right or wrong text again.
-        // Notes: If answerDisplayTime is defined within this function, it gets defined each time the function is called.
+        // Notes: If the variable answerDisplayTime is defined within this function, it gets defined each time the function is called.
         // This results in setInterval hiding the text according to each local answerDisplayTime variable.
         // Therefore answerDisplayTime is a global time variable. Similar situation for setTimeout().
         answerDisplayTime = newTime - 2;

@@ -28,6 +28,8 @@ body {
 
 .answerBtn {
 margin-top: 10px;
+background-color: #5e6ce8;
+border-color: #3B4BE3;
 }
 
 .answerPara {
@@ -57,3 +59,4 @@ margin-top: 10px;
 #submit-score {
     margin: 10px;
 }
+
