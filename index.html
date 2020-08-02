@@ -24,6 +24,7 @@
 </head>
 
 <body>
+
   <header class='top-bar'>
     <a href="#" class="top-left-bar" id="top-left-high-scores">High scores</a>
     <span id='timer' class="top-right-bar">Timer</span>
@@ -31,12 +32,12 @@
 
   <hr>
 
-  <section class="container">
-    <div class='row'>
+  <main class="container">
+    <header class='row'>
       <h1 class='col-md-12' id='quiz-title'>Coding Quiz</h1>
-    </div>
+    </header>
 
-    <div class="row name-input-row">
+    <section class="row name-input-row">
       <div class="col-md-12">
         <form id="name-input-form" method="POST">
           <label for="name-text">Submit your score</label>
@@ -44,16 +45,16 @@
         </form>
         <button type="submit" class="btn btn-success" id="submit-score">Submit</button>
       </div>
-    </div>
+    </section>
 
-    <div class='container' id='quiz'></div>
+    <section class='container' id='quiz'></section>
 
     <button type="button" class="btn btn-primary" id='start'>Start</button>
     <button type="button" class="btn btn-info" id='high-scores-btn'>High Scores</button>
 
     <hr id='answer-bar'>
     <p id="right-wrong"></p>
-  </section>
+  </main>
 
 </body>
 
