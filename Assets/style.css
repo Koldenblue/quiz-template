@@ -47,11 +47,11 @@ margin-top: 10px;
 }
 
 .even-row {
-    background-color: darkseagreen;
+    background-color: #FEE7D7;
 }
 
 .odd-row {
-    background-color: rgb(136, 136, 136);
+    background-color:#FEF2EC;
 }
 
 #submit-score {
