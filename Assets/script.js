@@ -38,14 +38,18 @@ const highScoresBtn = document.getElementById('high-scores-btn');
 const quizLayout = document.getElementById('quiz');
 const timer = document.getElementById('timer');
 const nameInputForm = document.getElementById("name-input-form");
-let highestScores = [];     // stores the top 10 highest scores
-let highScoresObj = {};     // stores high score names and associated scores
-let timeOver = true;        // indicates that quiz is over
-let newTime = 100;          // Time used by timer
-let questionNumber = 0;     // current question being asked from questionArray
-let answerDisplayTime;      // The amount of time that "Right" or "Wrong" is displayed
-const penaltyTime = 20;     // Penalty time for an incorrect answer
-let highScore;              // The player's score at the end of the quiz
+let quizTitle = document.getElementById("quiz-title");
+const TOTALTIMEGIVEN = 100;     // Total time given to take quiz
+const PENALTYTIME = 20;         // Penalty time for an incorrect answer. Suggestion: obtain by dividing TOTALTIMEGIVEN by number of questions.
+const SCORELISTLENGTH = 10;     // the number of high scores that will be stored
+const MAXNAMELENGTH = 50;       // the maximum length of a player's name that will be accepted and stored
+let highestScores = [];         // stores the top 10 highest scores
+let highScoresObj = {};         // stores high score names and associated scores
+let timeOver = true;            // indicates that quiz is over
+let newTime = TOTALTIMEGIVEN;   // Time used by timer
+let questionNumber = 0;         // current question being asked from questionArray
+let answerDisplayTime;          // The amount of time that "Right" or "Wrong" is displayed
+let highScore;                  // The player's score at the end of the quiz
 
 
 // MAIN FUNCTIONS
@@ -54,7 +58,7 @@ let highScore;              // The player's score at the end of the quiz
 /** Creates the initial quiz explanation and start button, and retrieves local storage. */
 function initialQuiz() {
     console.log("Page reloaded.");
-    quizLayout.innerHTML = "Answer all the questions within the time limit! Incorrect answers will subtract " + penaltyTime + " seconds from the time.";
+    quizLayout.innerHTML = "Answer all the questions within the time limit! Incorrect answers will subtract " + PENALTYTIME + " seconds from the time.";
     startBtn.style.display = "visible";
 
     // retrieve high scores lists from local storage.
@@ -75,7 +79,8 @@ initialQuiz();
 // The start button resets the timer, hides itself, hides high score elements, erases intitial content, and resets quiz-related variables.
 startBtn.addEventListener("click", function () {
     highScoresBtn.style.display = "none";
-    newTime = 100;
+    quizTitle.textContent="Coding Quiz";
+    newTime = TOTALTIMEGIVEN;
     timeOver = false;
     questionNumber = 0;
     startBtn.style.display = "none";
@@ -101,6 +106,123 @@ function runQuiz() {
     quizLayout.innerHTML = "";
     createLayout(questionArray[questionNumber]);
     questionNumber++;
+}
+
+
+// TIMER FUNCTIONS
+// ----------------
+
+/** Displays a countdown timer. */
+function decrement() {
+    let timerInterval = setInterval(
+        function() {
+            newTime--;
+            timer.textContent = "Time left: " + newTime + " seconds";
+            if (newTime <= 0) {
+                clearInterval(timerInterval);
+                youGotAHighScore();
+            }
+            if (timeOver) {
+                clearInterval(timerInterval);
+                timer.textContent = "Timer";
+            }
+        },
+        1000
+    );
+}
+
+/** Penalizes the player by a number of seconds equal to the PENALTYTIME parameter. */
+function penalize(PENALTYTIME) {
+    newTime -= PENALTYTIME;
+}
+
+
+// QUIZ QUESTION FUNCTIONS
+// -----------------------
+
+/** Writes a new question, new buttons, and new answers to the quizLayout element.
+ * @param {Object} questionObj Each questionObj should consist of a 'question' property,
+ *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value. */
+function createLayout(questionObj) {
+    let numberOfAnswers = questionObj.answers.length;
+
+    // First create a paragraph element for the question and append it to quizLayout.
+    let questionPara = document.createElement('p');
+    questionPara.textContent = questionObj["question"];
+    questionPara.setAttribute("class", "question col md-12");
+    quizLayout.appendChild(questionPara);
+
+    // Use a for loop to create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
+    for (let i = 0; i < numberOfAnswers; i++) {
+        let newRow = document.createElement('div');
+        newRow.setAttribute("class", "row");
+        quizLayout.appendChild(newRow);
+
+        let answerBtn = document.createElement('button');
+        // Here, add 1 to i on the answer button text, so answers start from 1 rather than 0
+        answerBtn.textContent = i + 1 + ".";
+        answerBtn.setAttribute("class", "answerBtn btn btn-primary col-md-1");
+        answerBtn.setAttribute("type", "button");
+        // add correctAnswer id to the correct answer button
+        if (questionObj.correctAnswer === i) {
+            answerBtn.setAttribute("id", "correctAnswer");
+        }
+        // create paragraphs containing the answer options
+        let answerPara = document.createElement('p');
+        answerPara.textContent = questionObj.answers[i];
+        answerPara.setAttribute("class", "answerPara col-md-11");
+
+        // Final step of loop: append the created elements.
+        newRow.appendChild(answerBtn);
+        newRow.appendChild(answerPara);
+    }
+
+    // To complete the layout function, add an event listener to the parent quiz div element.
+    // The listener activates upon an answer button press, since the answer buttons are children. (event delegation).
+    quizLayout.addEventListener("click", checkAnswer);
+}
+
+
+/** if answer button is clicked, execute this function. Shows "Right" or "wrong" text, depending on answer */
+function checkAnswer(event) {
+    event.preventDefault();
+    if (event.target.matches("button")) {
+        let hrElem = document.getElementById("answer-bar");
+        let feedbackText = document.getElementById('right-wrong');
+        if (event.target.id === "correctAnswer") {
+            feedbackText.textContent = "Correct!!!"
+        }
+        else {
+            feedbackText.textContent = "Wrong :(";
+            penalize(PENALTYTIME);
+        }
+
+        // Unhide the 'right' or 'wrong' text
+        hrElem.style.visibility = 'visible';
+        feedbackText.style.visibility = 'visible';
+
+        // execute runQuiz to continue the quiz by displaying a new question
+        runQuiz();
+
+        // After a bit of time, hide the right or wrong text again.
+        // Notes: If the variable answerDisplayTime is defined within this function, it gets defined each time the function is called.
+        // This results in setInterval hiding the text according to each local answerDisplayTime variable.
+        // Therefore answerDisplayTime is a global time variable. Similar situation for setTimeout().
+        answerDisplayTime = newTime - 2;
+        if (answerDisplayTime < 0) {
+            answerDisplayTime = 0;
+        }
+        let displayInterval = setInterval(
+            function() {
+                if (answerDisplayTime >= newTime) {
+                    hrElem.style.visibility = 'hidden';
+                    feedbackText.style.visibility = 'hidden';
+                    clearInterval(displayInterval);
+                }
+            },
+            1000
+        );
+    }
 }
 
 
@@ -178,7 +300,7 @@ function youGotAHighScore() {
 function isHighScore(highScore) {
     // if there are less than 10 scores in the high score list, return true.
     highestScores.sort();
-    if (highestScores.length < 10) {
+    if (highestScores.length < SCORELISTLENGTH) {
         return true;
     }
     // Since highestScores is sorted, only check if the given highScore is higher than the lowest score.
@@ -200,7 +322,7 @@ function submitName(event) {
 
     // Only store 10 scores at a time.
     if (inputName(highScore)) {
-        if (highestScores.length >= 10) {
+        if (highestScores.length >= SCORELISTLENGTH) {
             // Sort scores from highScoresObj
             // For reference: sortedScores[i][0] is a score associated with a name at sortedScores[i][1].
             // sortedScores in in order from highest to lowest score.
@@ -234,8 +356,8 @@ function inputName(highScore) {
         alert("You must have at least one character in your name!");
         return false;
     }
-    if (nameInput.length > 50) {
-        alert("Maximum character length for names is 50 characters!");
+    if (nameInput.length > MAXNAMELENGTH) {
+        alert("Maximum character length for names is " + MAXNAMELENGTH + " characters!");
         return false;
     }
 
@@ -260,12 +382,14 @@ function inputName(highScore) {
 function displayHighScores() {
     quizLayout.innerHTML = "";
     highScoresBtn.style.display = "none";
+    quizTitle.textContent = "High Scores";
 
     // scoreSort() returns a sorted 2D array of names and scores.
     let sortedScores = scoreSort();
 
     let alternateBackground = true      // indicates alternate background colors for alternating rows
     // A loop that first appends a score row to the quiz. Then it adds two columns, one for names and one for scores.
+
     for (let i = 0, j = sortedScores.length; i < j; i++) {
         let scoreRow = document.createElement("div");
         if (alternateBackground) {
@@ -319,121 +443,4 @@ function scoreSort() {
         }
     } while (swap != 0);
     return scoreArray;
-}
-
-
-// QUIZ QUESTION FUNCTIONS
-// -----------------------
-
-/** Writes a new question, new buttons, and new answers to the quizLayout element.
- * @param {Object} questionObj Each questionObj should consist of a 'question' property,
- *  an 'answers' property with an array as a value, and a 'correctAnswer' property with the array index as a value. */
-function createLayout(questionObj) {
-    let numberOfAnswers = questionObj.answers.length;
-
-    // First create a paragraph element for the question and append it to quizLayout.
-    let questionPara = document.createElement('p');
-    questionPara.textContent = questionObj["question"];
-    questionPara.setAttribute("class", "question col md-12");
-    quizLayout.appendChild(questionPara);
-
-    // Use a for loop to create buttons and paragraphs for each of 4 answers, and append them to quizLayout.
-    for (let i = 0; i < numberOfAnswers; i++) {
-        let newRow = document.createElement('div');
-        newRow.setAttribute("class", "row");
-        quizLayout.appendChild(newRow);
-
-        let answerBtn = document.createElement('button');
-        // Here, add 1 to i on the answer button text, so answers start from 1 rather than 0
-        answerBtn.textContent = i + 1 + ".";
-        answerBtn.setAttribute("class", "answerBtn btn btn-primary col-md-1");
-        answerBtn.setAttribute("type", "button");
-        // add correctAnswer id to the correct answer button
-        if (questionObj.correctAnswer === i) {
-            answerBtn.setAttribute("id", "correctAnswer");
-        }
-        // create paragraphs containing the answer options
-        let answerPara = document.createElement('p');
-        answerPara.textContent = questionObj.answers[i];
-        answerPara.setAttribute("class", "answerPara col-md-11");
-
-        // Final step of loop: append the created elements.
-        newRow.appendChild(answerBtn);
-        newRow.appendChild(answerPara);
-    }
-
-    // To complete the layout function, add an event listener to the parent quiz div element.
-    // The listener activates upon an answer button press, since the answer buttons are children. (event delegation).
-    quizLayout.addEventListener("click", checkAnswer);
-}
-
-
-/** if answer button is clicked, execute this function. Shows "Right" or "wrong" text, depending on answer */
-function checkAnswer(event) {
-    event.preventDefault();
-    if (event.target.matches("button")) {
-        let hrElem = document.getElementById("answer-bar");
-        let feedbackText = document.getElementById('right-wrong');
-        if (event.target.id === "correctAnswer") {
-            feedbackText.textContent = "Correct!!!"
-        }
-        else {
-            feedbackText.textContent = "Wrong :(";
-            penalize(penaltyTime);
-        }
-
-        // Unhide the 'right' or 'wrong' text
-        hrElem.style.visibility = 'visible';
-        feedbackText.style.visibility = 'visible';
-
-        // execute runQuiz to continue the quiz by displaying a new question
-        runQuiz();
-
-        // After a bit of time, hide the right or wrong text again.
-        // Notes: If the variable answerDisplayTime is defined within this function, it gets defined each time the function is called.
-        // This results in setInterval hiding the text according to each local answerDisplayTime variable.
-        // Therefore answerDisplayTime is a global time variable. Similar situation for setTimeout().
-        answerDisplayTime = newTime - 2;
-        if (answerDisplayTime < 0) {
-            answerDisplayTime = 0;
-        }
-        let displayInterval = setInterval(
-            function() {
-                if (answerDisplayTime >= newTime) {
-                    hrElem.style.visibility = 'hidden';
-                    feedbackText.style.visibility = 'hidden';
-                    clearInterval(displayInterval);
-                }
-            },
-            1000
-        );
-    }
-}
-
-
-// TIMER FUNCTIONS
-// ----------------
-
-/** Displays a countdown timer. */
-function decrement() {
-    let timerInterval = setInterval(
-        function() {
-            newTime--;
-            timer.textContent = "Time left: " + newTime + " seconds";
-            if (newTime <= 0) {
-                clearInterval(timerInterval);
-                youGotAHighScore();
-            }
-            if (timeOver) {
-                clearInterval(timerInterval);
-                timer.textContent = "Timer";
-            }
-        },
-        1000
-    );
-}
-
-/** Penalizes the player by a number of seconds equal to the penaltyTime parameter. */
-function penalize(penaltyTime) {
-    newTime -= penaltyTime;
 }
