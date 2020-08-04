@@ -42,8 +42,8 @@ const quizTitle = document.getElementById("quiz-title");
 const TOTALTIMEGIVEN = 100;     // Total time given to take quiz
 const PENALTYTIME = 20;         // Penalty time for an incorrect answer. Suggestion: obtain by dividing TOTALTIMEGIVEN by number of questions.
 const SCORELISTLENGTH = 10;     // the number of high scores that will be stored
-const MAXNAMELENGTH = 50;       // the maximum length of a player's name that will be stored. Only used if initialsOnly = false.
-let initialsOnly = true;        // Only allows input of 3 initials when set to true. Change to false to accept full names.
+const MAXNAMELENGTH = 50;       // the maximum length of a player's name that will be stored. Only used if INITIALSONLY = false.
+const INITIALSONLY = true;        // Only allows input of 3 initials when set to true. Change to false to accept full names.
 let highestScores = [];         // stores the top 10 highest scores
 let highScoresObj = {};         // stores high score names and associated scores
 let timeOver = true;            // indicates that quiz is over
@@ -244,7 +244,7 @@ document.getElementById("top-left-high-scores").addEventListener("click", functi
 });
 
 // If only initials rather than full names are being accepted, change the placeholder text.
-if (initialsOnly) {
+if (INITIALSONLY) {
     document.getElementById("name-text").setAttribute("placeholder", "Your initials here");
 }
 
@@ -361,7 +361,7 @@ function inputName(highScore) {
         alert("You must have at least one character in your name!");
         return false;
     }
-    if (initialsOnly) {
+    if (INITIALSONLY) {
         if (nameInput.length > 3) {
             alert("Only 3 initials accepted!");
             return false;
